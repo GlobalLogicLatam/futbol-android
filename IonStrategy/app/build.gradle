@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+
+def getVersionCode() {
+    return hasProperty('VERSION_CODE') ? VERSION_CODE : 1
+}
+
+def getVersionName() {
+    return hasProperty('VERSION_NAME') ? VERSION_NAME : "0.0.1"
+}
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "com.globallogic.futbol.strategies.ion.example"
+        minSdkVersion 16
+        targetSdkVersion 22
+        versionCode getVersionCode()
+        versionName getVersionName()
+        buildConfigField 'Boolean', 'MOCK', 'false'
+    }
+    buildTypes {
+        debug {
+            buildConfigField 'Boolean', 'MOCK', 'false'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile project(':ion')
+    compile 'com.android.support:support-v13:22.+'
+}

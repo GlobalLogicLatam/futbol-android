@@ -1,0 +1,108 @@
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def localReleaseDest = "${buildDir}/release/${version}"
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+def isReleaseBuild() {
+    return false;
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        pom*.whenConfigured { pom ->
+            pom.dependencies.removeAll { dep -> dep.artifactId == 'support-v4' }
+            pom.dependencies.removeAll { dep -> dep.artifactId == 'palette-v7' }
+        }
+
+        pom.groupId = GROUP_ID
+        pom.artifactId = ARTIFACT_ID
+        pom.version = VERSION_NAME
+
+        pom.project {
+            name PROJECT_NAME
+            packaging 'jar'
+            description PROJECT_DESCRIPTION
+            url PROJECT_URL
+
+/*
+                    scm {
+                        url "http://gitlab-art.globallogic.com.ar/androidarea_arg/futbol.git"
+                        connection "scm:git@gitlab-art.globallogic.com.ar:androidarea_arg/futbol.git"
+                        developerConnection "scm:git@gitlab-art.globallogic.com.ar:androidarea_arg/futbol.git"
+                    }
+*/
+
+            licenses {
+                license {
+                    name "The Apache Software License, Version 2.0"
+                    url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    distribution "repo"
+                }
+            }
+
+            def developersArray = rootProject.ext.developers
+            if (developersArray != null) {
+                developers {
+                    developersArray.each { developerObject ->
+                        developer {
+                            id developerObject.id
+                            name developerObject.name
+                            email developerObject.email
+                        }
+                    }
+                }
+            }
+        }
+
+        repository(url: RELEASE_REPOSITORY_URL) {
+            authentication(userName: RELEASE_REPOSITORY_USERNAME, password: RELEASE_REPOSITORY_PASSWORD)
+        }
+/*
+        snapshotRepository(url: SNAPSHOT_REPOSITORY_URL) {
+            authentication(userName: SNAPSHOT_REPOSITORY_USERNAME, password: SNAPSHOT_REPOSITORY_PASSWORD)
+        }
+*/
+    }
+}
+
+task zipRelease(type: Zip) {
+    from localReleaseDest
+    destinationDir buildDir
+    archiveName "release-${version}.zip"
+}
+
+task generateRelease << {
+    println "Release ${version} can be found at ${localReleaseDest}/"
+    println "Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
+}
+
+generateRelease.dependsOn(uploadArchives)
+generateRelease.dependsOn(zipRelease)
+
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+signing {
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
