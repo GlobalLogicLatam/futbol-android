@@ -7,12 +7,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -107,6 +109,27 @@ public class OperationHelper {
         return new GsonBuilder().setDateFormat(dateFormat).create().fromJson(string, aClass);
     }
 
+    static class ListOfModel<X> implements ParameterizedType {
+        private Class<?> wrapped;
+
+        public ListOfModel(Class<X> wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        public Type[] getActualTypeArguments() {
+            return new Type[]{wrapped};
+        }
+
+        public Type getRawType() {
+            return List.class;
+        }
+
+        public Type getOwnerType() {
+            return null;
+        }
+    }
+
+
     /**
      * String converter to a object specified
      *
@@ -117,8 +140,7 @@ public class OperationHelper {
      * @see <a href="https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/JsonSyntaxException.html">JsonSyntaxException</a>
      */
     public static <T> ArrayList<T> getModelArray(String string, Class<T> aClass) throws JsonSyntaxException {
-        return new Gson().fromJson(string, new TypeToken<ArrayList<T>>() {
-        }.getType());
+        return new Gson().fromJson(string, new ListOfModel<T>(aClass));
     }
 
     /**
@@ -132,8 +154,7 @@ public class OperationHelper {
      * @see <a href="https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/JsonSyntaxException.html">JsonSyntaxException</a>
      */
     public static <T> ArrayList<T> getModelArray(String string, String dateFormat, Class<T> aClass) throws JsonSyntaxException {
-        return new GsonBuilder().setDateFormat(dateFormat).create().fromJson(string, new TypeToken<ArrayList<T>>() {
-        }.getType());
+        return new GsonBuilder().setDateFormat(dateFormat).create().fromJson(string, new ListOfModel<T>(aClass));
     }
 
     public interface ExceptionCallback {
