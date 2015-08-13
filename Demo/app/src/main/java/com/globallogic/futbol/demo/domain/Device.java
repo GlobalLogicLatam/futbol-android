@@ -1,4 +1,4 @@
-package com.globallogic.futbol.demo;
+package com.globallogic.futbol.demo.domain;
 
 import java.io.Serializable;
 
@@ -6,14 +6,15 @@ import java.io.Serializable;
  * Created by Facundo Mengoni on 6/12/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class DemoModel implements Serializable{
+public class Device implements Serializable {
     private Long id;
     private String name;
+    private String resolution;
 
-    public DemoModel() {
+    public Device() {
     }
 
-    public DemoModel(Long id, String name) {
+    public Device(Long id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -32,5 +33,13 @@ public class DemoModel implements Serializable{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
     }
 }

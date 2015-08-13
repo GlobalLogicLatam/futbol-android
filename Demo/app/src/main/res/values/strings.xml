@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">FutbolDemo</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="add_device">Add</string>
 
+    <string name="internal_error">Internal error</string>
+    <string name="bad_request">Bad request</string>
     <string name="empty_error"></string>
-    <string name="json_syntax_exception">jsonSyntaxException</string>
-    <string name="time_out_exception">timeOutException</string>
-    <string name="socket_exception">socketException</string>
-    <string name="malformed_url_exception">malformedURLException</string>
-    <string name="io_exception">ioException</string>
-    <string name="other_exception">otherException</string>
+    <string name="json_syntax_exception">Json syntax error</string>
+    <string name="time_out_exception">Time Out error</string>
+    <string name="socket_exception">Socket exception</string>
+    <string name="malformed_url_exception">Malformed URL error</string>
+    <string name="io_exception">I/O error</string>
+    <string name="other_exception">Unexpected error</string>
 </resources>

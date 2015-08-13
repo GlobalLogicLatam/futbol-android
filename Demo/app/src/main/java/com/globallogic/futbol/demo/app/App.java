@@ -1,4 +1,4 @@
-package com.globallogic.futbol.demo;
+package com.globallogic.futbol.demo.app;
 
 import android.app.Application;
 
