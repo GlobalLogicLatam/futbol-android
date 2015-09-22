@@ -300,8 +300,11 @@ public class MainActivityFragment extends Fragment implements DemoOperation.IDem
 }
 ```
 
+# Test
+Es posible testear las operaciones para verificar que las respuestas esperadas se parseen y lancen los broadcast correspondientes.
+Podes ver un [https://github.com/globallogicargentina/futbol-android/tree/master/Library/app/src/test/java/com/globallogic/futbol/example](ejemplo de test) en la `app` 
+
 # Diagramas
 
-
 # Feedback
-Para mejorar la librería necesitaríamos saber que piensan, corregir bugs y recibir propuestas de mejoras. Por eso les pedimos que abran los [issues](https://gitlab-art.globallogic.com.ar/androidarea_arg/futbol/issues) que sean necesarios **definiendo** el label correspondiente.
+Para mejorar la librería necesitaríamos saber que piensan, corregir bugs y recibir propuestas de mejoras. Por eso les pedimos que abran los [issues](https://github.com/globallogicargentina/futbol-android/issues/) que sean necesarios **definiendo** el label correspondiente.
