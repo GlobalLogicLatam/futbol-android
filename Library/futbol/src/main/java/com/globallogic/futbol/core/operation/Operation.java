@@ -46,12 +46,24 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     //endregion
 
     //region Constructors
+
+    /**
+     * Create a new instance with an id empty.
+     * <p>
+     * The id is used to register the receiver for a specific operation.
+     * If you register two operation with different ids then the receiver
+     * of one operation never listen the other operation.
+     */
     protected Operation() {
         this("");
     }
 
     /**
-     * ToDo
+     * Create a new instance with the specified id.
+     * <p>
+     * The id is used to register the receiver for a specific operation.
+     * If you register two operation with different ids then the receiver
+     * of one operation never listen the other operation.
      */
     protected Operation(String id) {
         this.id = id;
@@ -60,12 +72,27 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     //endregion
 
     //region Methods for test
+
+    /**
+     * Run the operation synchronously and return the response expected in the callback of the broadcast
+     *
+     * @see Operation#beforeWorkInBackground()
+     * @see Operation#workInBackground(Exception, int, String)
+     * @see Operation#afterWorkInBackground(Boolean)
+     */
     public void testResponse(StrategyMockResponse aMockResponse) {
         beforeWorkInBackground();
         Boolean result = workInBackground(null, aMockResponse.getHttpCode(), aMockResponse.getResponse());
         afterWorkInBackground(result);
     }
 
+    /**
+     * Run the operation synchronously and return the exception expected in the callback of the broadcast
+     *
+     * @see Operation#beforeWorkInBackground()
+     * @see Operation#workInBackground(Exception, int, String)
+     * @see Operation#afterWorkInBackground(Boolean)
+     */
     public void testResponse(Exception anException) {
         beforeWorkInBackground();
         Boolean result = workInBackground(anException, 0, null);
@@ -74,19 +101,29 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     //endregion
 
     //region IStrategyCallback
-    public void parseResponse(final Exception e, final int aHttpCode, final String result) {
-        if (e != null)
-            mLogger.log(Level.SEVERE, e.getMessage(), e);
-        if (TextUtils.isEmpty(result) || !(result.startsWith("{") || result.startsWith("[")))
-            mLogger.severe("Result: " + result);
+
+    /**
+     * Analysis of the response returned by the server
+     *
+     * @param aException the exception thrown because of some error
+     * @param aHttpCode  the http response code
+     * @param aString    the string of the response
+     * @see Operation#workInBackground(Exception, int, String)
+     * @see Operation#afterWorkInBackground(Boolean)
+     */
+    public void parseResponse(final Exception aException, final int aHttpCode, final String aString) {
+        if (aException != null)
+            mLogger.log(Level.SEVERE, aException.getMessage(), aException);
+        if (TextUtils.isEmpty(aString) || !(aString.startsWith("{") || aString.startsWith("[")))
+            mLogger.severe("Result: " + aString);
         else
-            mLogger.info("Result: " + result);
+            mLogger.info("Result: " + aString);
 
         // Parse and analyze
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
-                return workInBackground(e, aHttpCode, result);
+                return workInBackground(aException, aHttpCode, aString);
             }
 
             @Override
@@ -99,12 +136,26 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     //endregion
 
     //region IOperation
+
+    /**
+     * It registers that the operation would be executed but for some reason
+     * could not be implemented and that there is someone waiting to do.
+     */
     @Override
     public IOperation setAsWaiting() {
         mOperationStatus = OperationStatus.WAITING_EXECUTION;
         return this;
     }
 
+    /**
+     * Executes the operation with the specified parameters.
+     *
+     * @param arg The arguments of the operation.
+     * @see Operation#reset()
+     * @see Operation#beforeWorkInBackground()
+     * @see Operation#simulateWaiting(Object...)
+     * @see Operation#doRequest(Object...)
+     */
     @Override
     public boolean performOperation(Object... arg) {
         switch (mOperationStatus) {
@@ -141,7 +192,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      */
     protected abstract void addExtrasForResultError(Intent intent);
 
-    private void sendBroadcastForStart() {
+    public void sendBroadcastForStart() {
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.START.name);
 
@@ -199,11 +250,23 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         mOperationStatus = OperationStatus.READY_TO_EXECUTE;
     }
 
+    /**
+     * Execute the request with the strategy
+     *
+     * @see IOperationStrategy
+     */
     private void doRequest(Object... arg) {
         mStrategy = getStrategy(arg);
         mStrategy.doRequest(this);
     }
 
+    /**
+     * Simulate a delay in the connection and then execute the request
+     *
+     * @see Operation#setConnectionDelay(int)
+     * @see Operation#setConnectionDelay(long)
+     * @see Operation#doRequest(Object...)
+     */
     private void simulateWaiting(final Object... arg) {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -223,16 +286,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }.execute((Void) null);
     }
 
-    private void onCompleted(boolean aResult) {
-        if (aResult) {
-            sendBroadcastForOk();
-        } else {
-            sendBroadcastForError();
-        }
-    }
-
     /**
      * Called when the operation is finished but before the receiver is notified.
+     *
+     * @param duration The duration of the request from which start until finish
      */
     protected void onOperationFinish(Long duration) {
     }
@@ -247,19 +304,33 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      */
     protected abstract IOperationStrategy getStrategy(Object... arg);
 
+    /**
+     * Initialize variables and send the broadcast to notify that the operation starts
+     *
+     * @see Operation#sendBroadcastForStart()
+     */
     private void beforeWorkInBackground() {
         mOperationStatus = OperationStatus.DOING_EXECUTION;
-        sendBroadcastForStart();
         timeInit = Calendar.getInstance().getTimeInMillis();
+        sendBroadcastForStart();
     }
 
-    private Boolean workInBackground(Exception e, int aHttpCode, String result) {
-        if (e != null) {
-            analyzeException(e);
+    /**
+     * Analyze the parameters to determine what would do
+     *
+     * @param anException The exception occurred
+     * @param aHttpCode   The httpCode obtained
+     * @param aString     The aString obtained
+     * @see Operation#analyzeException(Exception)
+     * @see Operation#analyzeResult(int, String)
+     */
+    private Boolean workInBackground(Exception anException, int aHttpCode, String aString) {
+        if (anException != null) {
+            analyzeException(anException);
             return false;
         } else {
             try {
-                analyzeResult(aHttpCode, result);
+                analyzeResult(aHttpCode, aString);
             } catch (Exception e2) {
                 mLogger.log(Level.INFO, "Error in analyzeResult: " + e2.getMessage(), e2);
                 analyzeException(e2);
@@ -269,6 +340,14 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }
     }
 
+    /**
+     * Update the variables and send the broadcast to notify that the operation finished
+     *
+     * @param aResult Boolean that notify the result of the operation
+     * @see Operation#onOperationFinish(Long)
+     * @see Operation#sendBroadcastForOk()
+     * @see Operation#sendBroadcastForError()
+     */
     private void afterWorkInBackground(Boolean aResult) {
         mOperationStatus = OperationStatus.FINISHED_EXECUTION;
         if (timeInit != null) {
@@ -276,7 +355,11 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             long difference = timeFinish - timeInit;
             onOperationFinish(difference);
         }
-        onCompleted(aResult);
+        if (aResult) {
+            sendBroadcastForOk();
+        } else {
+            sendBroadcastForError();
+        }
     }
     //endregion
 
@@ -321,6 +404,8 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Defines a time delay for the operation
+     *
+     * @see Operation#simulateWaiting(Object...)
      */
     protected void setConnectionDelay(int duration) {
         this.mConnectionDelay = (long) duration;
@@ -328,18 +413,29 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Defines a time delay for the operation
+     *
+     * @see Operation#simulateWaiting(Object...)
      */
     protected void setConnectionDelay(long duration) {
         this.mConnectionDelay = duration;
     }
 
+    /**
+     * @return The id of the operation
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Defines an id for the operation
+     *
+     * @see Operation#Operation(String)
+     */
     public void setId(String id) {
-        if (id != null)
-            this.id = id;
+        if (id == null)
+            id = "";
+        this.id = id;
     }
     //endregion
 
@@ -350,6 +446,8 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
         Operation operation = (Operation) o;
 
+        if (!TextUtils.isEmpty(id) ? !id.equals(operation.id) : !TextUtils.isEmpty(operation.id))
+            return false;
         if (timeInit != null ? !timeInit.equals(operation.timeInit) : operation.timeInit != null)
             return false;
 
@@ -358,6 +456,8 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     @Override
     public int hashCode() {
-        return timeInit != null ? timeInit.hashCode() : 0;
+        int result = timeInit != null ? timeInit.hashCode() : 0;
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
     }
 }
