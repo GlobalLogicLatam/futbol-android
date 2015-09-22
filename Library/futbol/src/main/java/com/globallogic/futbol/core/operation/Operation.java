@@ -10,6 +10,7 @@ import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.interfaces.IOperation;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.interfaces.IStrategyCallback;
+import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -18,28 +19,33 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class Operation implements Serializable, IOperation, IStrategyCallback {
+    //region Constants
     private static final String TAG = Operation.class.getSimpleName();
     private static final String SAVE_INSTANCE_TIME_INIT = "SAVE_INSTANCE_TIME_INIT";
     private static final String SAVE_INSTANCE_ID = "SAVE_INSTANCE_ID";
-    private static final String SAVE_INSTANCE_RESULT = "SAVE_INSTANCE_RESULT";
     private static final String SAVE_INSTANCE_STATE = "SAVE_INSTANCE_STATE";
     private static final String SAVE_INSTANCE_STRATEGY = "SAVE_INSTANCE_STRATEGY";
+    //endregion
 
+    //region Log
     public static Logger mLogger;
 
     static {
         mLogger = Logger.getLogger(TAG);
         mLogger.setLevel(Level.OFF);
     }
+    //endregion
 
-    public Integer mConnectionDelay = 0;
+    //region Variables
+    public Long mConnectionDelay = 0l;
     private Long timeInit;
     private String id;
 
     private OperationStatus mOperationStatus;
     private IOperationStrategy mStrategy;
-    private boolean mResult;
+    //endregion
 
+    //region Constructors
     protected Operation() {
         this("");
     }
@@ -51,29 +57,52 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         this.id = id;
         reset();
     }
+    //endregion
 
-    /**
-     * Defines a time delay for the operation
-     */
-    protected void setConnectionDelay(int duration) {
-        this.mConnectionDelay = duration;
+    //region Methods for test
+    public void testResponse(StrategyMockResponse aMockResponse) {
+        beforeWorkInBackground();
+        Boolean result = workInBackground(null, aMockResponse.getHttpCode(), aMockResponse.getResponse());
+        afterWorkInBackground(result);
     }
 
-    public String getId() {
-        return id;
+    public void testResponse(Exception anException) {
+        beforeWorkInBackground();
+        Boolean result = workInBackground(anException, 0, null);
+        afterWorkInBackground(result);
     }
+    //endregion
 
-    public void setId(String id) {
-        if (id != null)
-            this.id = id;
+    //region IStrategyCallback
+    public void parseResponse(final Exception e, final int aHttpCode, final String result) {
+        if (e != null)
+            mLogger.log(Level.SEVERE, e.getMessage(), e);
+        if (TextUtils.isEmpty(result) || !(result.startsWith("{") || result.startsWith("[")))
+            mLogger.severe("Result: " + result);
+        else
+            mLogger.info("Result: " + result);
+
+        // Parse and analyze
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return workInBackground(e, aHttpCode, result);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                afterWorkInBackground(result);
+            }
+        }.execute((Void) null);
     }
+    //endregion
 
-    /**
-     * Returns to the original state of the operation
-     */
-    public void reset() {
-        mOperationStatus = OperationStatus.READY_TO_EXECUTE;
-        mResult = false;
+    //region IOperation
+    @Override
+    public IOperation setAsWaiting() {
+        mOperationStatus = OperationStatus.WAITING_EXECUTION;
+        return this;
     }
 
     @Override
@@ -83,9 +112,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             case UNKNOWN:
             case READY_TO_EXECUTE:
             case WAITING_EXECUTION:
-                mOperationStatus = OperationStatus.DOING_EXECUTION;
-                sendBroadcastForStart();
-                timeInit = Calendar.getInstance().getTimeInMillis();
+                beforeWorkInBackground();
                 if (mConnectionDelay > 0) {
                     simulateWaiting(arg);
                 } else {
@@ -100,92 +127,19 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }
     }
 
-    private void simulateWaiting(final Object... arg) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    Thread.sleep(new Random().nextInt(mConnectionDelay));
-                } catch (InterruptedException e) {
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                doRequest(arg);
-            }
-        }.execute((Void) null);
-    }
-
-    private void doRequest(Object... arg) {
-        mStrategy = getStrategy(arg);
-        mStrategy.doRequest(this);
-    }
+    //region Broadcast
 
     /**
-     * Returns a strategy for server connection
-     *
-     * @param arg The arguments specified in performOperation()
+     * It allows you to add extras to the intent that will be received by the receiver.
+     * Is triggered only if you can connect to the server.
      */
-    protected abstract IOperationStrategy getStrategy(Object... arg);
-
-    public void parseResponse(final Exception e, final int aHttpCode, final String result) {
-        if (e != null)
-            mLogger.log(Level.SEVERE, e.getMessage(), e);
-        if (TextUtils.isEmpty(result) || !(result.startsWith("{") || result.startsWith("[")))
-            mLogger.severe("Result: " + result);
-        else
-            mLogger.info("Result: " + result);
-
-        // Parse and analyze
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                if (e != null) {
-                    analyzeException(e);
-                    return false;
-                } else {
-                    try {
-                        analyzeResult(aHttpCode, result);
-                    } catch (Exception e) {
-                        mLogger.log(Level.INFO, "Error in analyzeResult: " + e.getMessage(), e);
-                        analyzeException(e);
-                        return false;
-                    }
-                    return true;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-                mResult = result;
-                mOperationStatus = OperationStatus.FINISHED_EXECUTION;
-                if (timeInit != null) {
-                    long timeFinish = Calendar.getInstance().getTimeInMillis();
-                    long difference = timeFinish - timeInit;
-                    onOperationFinish(difference);
-                }
-                onCompleted();
-            }
-        }.execute((Void) null);
-    }
-
-    private void onCompleted() {
-        if (mResult) {
-            sendBroadcastForOk();
-        } else {
-            sendBroadcastForError();
-        }
-    }
+    protected abstract void addExtrasForResultOk(Intent intent);
 
     /**
-     * Called when the operation is finished but before the receiver is notified.
+     * It allows you to add extras to the intent that will be received by the receiver.
+     * Is triggered only if an error has occurred.
      */
-    protected void onOperationFinish(Long duration) {
-    }
+    protected abstract void addExtrasForResultError(Intent intent);
 
     private void sendBroadcastForStart() {
         Intent intent = new Intent();
@@ -218,12 +172,6 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }
     }
 
-    /**
-     * It allows you to add extras to the intent that will be received by the receiver.
-     * Is triggered only if you can connect to the server.
-     */
-    protected abstract void addExtrasForResultOk(Intent intent);
-
     public void sendBroadcastForError() {
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.ERROR.name);
@@ -239,13 +187,100 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
         }
     }
+    //endregion
+    //endregion
+
+    //region Lazy work
 
     /**
-     * It allows you to add extras to the intent that will be received by the receiver.
-     * Is triggered only if an error has occurred.
+     * Returns to the original state of the operation
      */
-    protected abstract void addExtrasForResultError(Intent intent);
+    public void reset() {
+        mOperationStatus = OperationStatus.READY_TO_EXECUTE;
+    }
 
+    private void doRequest(Object... arg) {
+        mStrategy = getStrategy(arg);
+        mStrategy.doRequest(this);
+    }
+
+    private void simulateWaiting(final Object... arg) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Thread.sleep(new Random().nextInt(mConnectionDelay.intValue()));
+                } catch (InterruptedException e) {
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                doRequest(arg);
+            }
+        }.execute((Void) null);
+    }
+
+    private void onCompleted(boolean aResult) {
+        if (aResult) {
+            sendBroadcastForOk();
+        } else {
+            sendBroadcastForError();
+        }
+    }
+
+    /**
+     * Called when the operation is finished but before the receiver is notified.
+     */
+    protected void onOperationFinish(Long duration) {
+    }
+    //endregion
+
+    //region Hard work
+
+    /**
+     * Returns a strategy for server connection
+     *
+     * @param arg The arguments specified in performOperation()
+     */
+    protected abstract IOperationStrategy getStrategy(Object... arg);
+
+    private void beforeWorkInBackground() {
+        mOperationStatus = OperationStatus.DOING_EXECUTION;
+        sendBroadcastForStart();
+        timeInit = Calendar.getInstance().getTimeInMillis();
+    }
+
+    private Boolean workInBackground(Exception e, int aHttpCode, String result) {
+        if (e != null) {
+            analyzeException(e);
+            return false;
+        } else {
+            try {
+                analyzeResult(aHttpCode, result);
+            } catch (Exception e2) {
+                mLogger.log(Level.INFO, "Error in analyzeResult: " + e2.getMessage(), e2);
+                analyzeException(e2);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private void afterWorkInBackground(Boolean aResult) {
+        mOperationStatus = OperationStatus.FINISHED_EXECUTION;
+        if (timeInit != null) {
+            long timeFinish = Calendar.getInstance().getTimeInMillis();
+            long difference = timeFinish - timeInit;
+            onOperationFinish(difference);
+        }
+        onCompleted(aResult);
+    }
+    //endregion
+
+    //region Android lifecycle
     public void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             //Restauro los datos necesario de la operacion
@@ -260,12 +295,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         outState.putSerializable(SAVE_INSTANCE_STATE, mOperationStatus);
         if (mStrategy != null)
             outState.putSerializable(SAVE_INSTANCE_STRATEGY, mStrategy);
-        outState.putBoolean(SAVE_INSTANCE_RESULT, mResult);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         id = savedInstanceState.getString(SAVE_INSTANCE_ID);
-        mResult = savedInstanceState.getBoolean(SAVE_INSTANCE_RESULT);
         mOperationStatus = (OperationStatus) savedInstanceState.getSerializable(SAVE_INSTANCE_STATE);
         if (savedInstanceState.containsKey(SAVE_INSTANCE_STRATEGY)) {
             mStrategy = (IOperationStrategy) savedInstanceState.getSerializable(SAVE_INSTANCE_STRATEGY);
@@ -274,12 +307,9 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         if (savedInstanceState.containsKey(SAVE_INSTANCE_TIME_INIT))
             timeInit = savedInstanceState.getLong(SAVE_INSTANCE_TIME_INIT);
     }
+    //endregion
 
-    @Override
-    public IOperation setAsWaiting() {
-        mOperationStatus = OperationStatus.WAITING_EXECUTION;
-        return this;
-    }
+    //region Getters & Setters
 
     /**
      * @return The status of the operation
@@ -288,6 +318,30 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     public OperationStatus getStatus() {
         return mOperationStatus;
     }
+
+    /**
+     * Defines a time delay for the operation
+     */
+    protected void setConnectionDelay(int duration) {
+        this.mConnectionDelay = (long) duration;
+    }
+
+    /**
+     * Defines a time delay for the operation
+     */
+    protected void setConnectionDelay(long duration) {
+        this.mConnectionDelay = duration;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        if (id != null)
+            this.id = id;
+    }
+    //endregion
 
     @Override
     public boolean equals(Object o) {

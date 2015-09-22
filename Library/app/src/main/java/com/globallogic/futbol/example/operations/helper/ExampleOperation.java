@@ -8,13 +8,15 @@ import com.globallogic.futbol.core.operation.Operation;
 import com.globallogic.futbol.core.operation.OperationHelper;
 import com.globallogic.futbol.example.R;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Facundo Mengoni on 6/3/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
 public abstract class ExampleOperation extends Operation {
     public static final String ERROR_RESOURCE = "ERROR_RESOURCE";
-    public static final int SECONDS = 5;
+    public static final int SECONDS = 3;
     public int errorResource = R.string.no_error;
 
     public ExampleOperation() {
@@ -27,7 +29,7 @@ public abstract class ExampleOperation extends Operation {
     }
 
     private void init() {
-        // setConnectionDelay(SECONDS * 1000);
+        setConnectionDelay(TimeUnit.SECONDS.toMillis(SECONDS));
     }
 
     @Override
