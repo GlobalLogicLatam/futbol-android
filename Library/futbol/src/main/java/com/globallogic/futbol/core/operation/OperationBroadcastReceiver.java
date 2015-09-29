@@ -144,6 +144,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      */
     public void register(Class aClass, String aId) {
         IntentFilter filter = new IntentFilter();
+        filter.addAction(getActionForNoInternet(aClass, aId));
         filter.addAction(getActionForStart(aClass, aId));
         filter.addAction(getActionForOk(aClass, aId));
         filter.addAction(getActionForError(aClass, aId));
