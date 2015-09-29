@@ -45,6 +45,11 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
     }
 
     @Override
+    public void onNoInternet() {
+        // ToDo
+    }
+
+    @Override
     public void onStartOperation() {
         updateOperationStatus();
         enableButtons(false);

@@ -1,6 +1,9 @@
 package com.globallogic.futbol.core.operation;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -49,7 +52,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with an id empty.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -60,7 +63,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with the specified id.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -163,6 +166,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             case UNKNOWN:
             case READY_TO_EXECUTE:
             case WAITING_EXECUTION:
+                if (!hasInternet()){
+                    sendBroadcastForNoInternet();
+                    return false;
+                }
                 beforeWorkInBackground();
                 if (mConnectionDelay > 0) {
                     simulateWaiting(arg);
@@ -178,6 +185,18 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }
     }
 
+    private boolean hasInternet() {
+        ConnectivityManager cm = (ConnectivityManager) OperationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return Boolean.FALSE;
+        }
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return Boolean.FALSE;
+        }
+        return networkInfo.isConnected();
+    }
+
     //region Broadcast
 
     /**
@@ -191,6 +210,21 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * Is triggered only if an error has occurred.
      */
     protected abstract void addExtrasForResultError(Intent intent);
+
+    public void sendBroadcastForNoInternet() {
+        Intent intent = new Intent();
+        intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.NO_INTERNET.name);
+
+        String actionWithId = OperationBroadcastReceiver.getActionForNoInternet(this);
+        intent.setAction(actionWithId);
+        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+
+        String actionWithOutID = OperationBroadcastReceiver.getActionForNoInternet(getClass());
+        if (!actionWithId.equals(actionWithOutID)) {
+            intent.setAction(actionWithOutID);
+            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        }
+    }
 
     public void sendBroadcastForStart() {
         Intent intent = new Intent();

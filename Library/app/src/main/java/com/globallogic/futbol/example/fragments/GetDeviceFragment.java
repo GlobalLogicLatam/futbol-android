@@ -34,6 +34,11 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
     }
 
     @Override
+    public void onNoInternet() {
+        // ToDo
+    }
+
+    @Override
     public void onStartOperation() {
         updateOperationStatus();
     }

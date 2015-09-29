@@ -2,7 +2,6 @@ package com.globallogic.futbol.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -63,7 +62,11 @@ public class UpdateDeviceOperation extends ExampleOperation {
             intent.putExtra(UpdateDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface IUpdateDeviceReceiver extends IOperationReceiver {
+    public interface IUpdateDeviceReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess(Device aDevice);
 
         void onError();
@@ -77,8 +80,18 @@ public class UpdateDeviceOperation extends ExampleOperation {
         private final IUpdateDeviceReceiver mCallback;
 
         public UpdateDeviceReceiver(IUpdateDeviceReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onNoInternet();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

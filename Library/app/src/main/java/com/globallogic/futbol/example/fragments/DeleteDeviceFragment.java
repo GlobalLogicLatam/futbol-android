@@ -43,6 +43,11 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
     }
 
     @Override
+    public void onNoInternet() {
+        // ToDo
+    }
+
+    @Override
     public void onStartOperation() {
         updateOperationStatus();
         enableButtons(false);

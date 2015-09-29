@@ -47,6 +47,11 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
     }
 
     @Override
+    public void onNoInternet() {
+        // ToDo
+    }
+
+    @Override
     public void onStartOperation() {
         updateOperationStatus();
         enableButtons(false);

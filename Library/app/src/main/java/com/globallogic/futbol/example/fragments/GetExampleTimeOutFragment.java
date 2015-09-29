@@ -32,6 +32,11 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
     }
 
     @Override
+    public void onNoInternet() {
+        // ToDo
+    }
+
+    @Override
     public void onStartOperation() {
         updateOperationStatus();
     }
