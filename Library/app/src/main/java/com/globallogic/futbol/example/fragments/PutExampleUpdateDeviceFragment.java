@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
@@ -44,6 +45,11 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
         vName.setEnabled(value);
         vResolution.setEnabled(value);
         vSubmit.setEnabled(value);
+    }
+
+    @Override
+    public void onNoInternet() {
+        Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.globallogic.futbol.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.strategies.StrategyMock;
@@ -30,7 +29,11 @@ public class TimeOutOperation extends ExampleOperation {
     protected void addExtrasForResultOk(Intent intent) {
     }
 
-    public interface ITimeOutReceiver extends IOperationReceiver {
+    public interface ITimeOutReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess();
 
         void onError();
@@ -40,8 +43,18 @@ public class TimeOutOperation extends ExampleOperation {
         private final ITimeOutReceiver mCallback;
 
         public TimeOutReceiver(ITimeOutReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onNoInternet();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

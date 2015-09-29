@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
@@ -31,6 +32,11 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
 
     public static GetDeviceFragment newInstance() {
         return new GetDeviceFragment();
+    }
+
+    @Override
+    public void onNoInternet() {
+        Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
     }
 
     @Override
