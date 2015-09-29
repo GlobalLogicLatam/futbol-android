@@ -49,7 +49,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with an id empty.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -60,7 +60,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with the specified id.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -238,6 +238,21 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
         }
     }
+
+    public void sendBroadcastForFinish() {
+        Intent intent = new Intent();
+        intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.FINISH.name);
+
+        String actionWithId = OperationBroadcastReceiver.getActionForFinish(this);
+        intent.setAction(actionWithId);
+        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+
+        String actionWithOutID = OperationBroadcastReceiver.getActionForFinish(getClass());
+        if (!actionWithId.equals(actionWithOutID)) {
+            intent.setAction(actionWithOutID);
+            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        }
+    }
     //endregion
     //endregion
 
@@ -360,6 +375,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         } else {
             sendBroadcastForError();
         }
+        sendBroadcastForFinish();
     }
     //endregion
 

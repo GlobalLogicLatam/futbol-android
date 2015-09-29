@@ -41,6 +41,12 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
                 aOperation.getId());
     }
 
+    public static String getActionForFinish(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
+                OperationResult.FINISH.name,
+                aOperation.getId());
+    }
+
     public static String getActionForStart(Class aClass) {
         return getActionForStart(aClass, "");
     }
@@ -71,11 +77,23 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
                 aId);
     }
 
+    public static String getActionForFinish(Class aClass) {
+        return getActionForFinish(aClass, "");
+    }
+
+    public static String getActionForFinish(Class aClass, String aId) {
+        return getAction(aClass.getSimpleName(),
+                OperationResult.FINISH.name,
+                aId);
+    }
+
     @Override
     public void onReceive(Context aContext, Intent intent) {
         String status = intent.getStringExtra(OperationResult.EXTRA_STATUS);
         if (OperationResult.START.name.equals(status)) {
             mCallback.onStartOperation();
+        } else if (OperationResult.FINISH.name.equals(status)) {
+            onFinishOperation();
         } else if (OperationResult.OK.name.equals(status)) {
             onResultOK(intent);
         } else {
@@ -92,6 +110,12 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * It is triggered when an error occurred when connecting to the server
      */
     protected abstract void onResultError(Intent anIntent);
+
+    /**
+     * Called when the operation is finished. This is after return the result (whether successful or not).
+     */
+    protected void onFinishOperation(){
+    }
 
     /**
      * Register the receiver to listen events of the operation
@@ -122,6 +146,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
         filter.addAction(getActionForStart(aClass, aId));
         filter.addAction(getActionForOk(aClass, aId));
         filter.addAction(getActionForError(aClass, aId));
+        filter.addAction(getActionForFinish(aClass, aId));
         LocalBroadcastManager.getInstance(OperationApp.getInstance()).registerReceiver(this, filter);
     }
 
