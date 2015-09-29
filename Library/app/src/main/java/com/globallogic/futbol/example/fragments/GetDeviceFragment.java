@@ -46,14 +46,17 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
 
     @Override
     public void onSuccess(Device aDevice) {
-        updateOperationStatus();
         vOperationResult.setText(aDevice.toString());
     }
 
     @Override
     public void onError() {
-        updateOperationStatus();
         vOperationResult.setText(mGetDeviceOperation.getError(getActivity()));
+    }
+
+    @Override
+    public void onFinishOperation() {
+        updateOperationStatus();
     }
 
     @Override

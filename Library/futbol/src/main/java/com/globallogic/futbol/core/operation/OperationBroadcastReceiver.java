@@ -44,6 +44,12 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
                 aOperation.getId());
     }
 
+    public static String getActionForFinish(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
+                OperationResult.FINISH.name,
+                aOperation.getId());
+    }
+
     public static String getActionForNoInternet(Class aClass) {
         return getActionForNoInternet(aClass, "");
     }
@@ -52,12 +58,6 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
         return getAction(aClass.getSimpleName(),
                 OperationResult.NO_INTERNET.name,
                 aId);
-    }
-
-    public static String getActionForFinish(Operation aOperation) {
-        return getAction(aOperation.getClass().getSimpleName(),
-                OperationResult.FINISH.name,
-                aOperation.getId());
     }
 
     public static String getActionForStart(Class aClass) {
@@ -139,7 +139,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     /**
      * Called when the operation is finished. This is after return the result (whether successful or not).
      */
-    protected void onFinishOperation(){
+    protected void onFinishOperation() {
     }
 
     /**
