@@ -52,7 +52,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with an id empty.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -63,7 +63,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with the specified id.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -84,6 +84,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#afterWorkInBackground(Boolean)
      */
     public void testResponse(StrategyMockResponse aMockResponse) {
+        if (!hasInternet()) {
+            sendBroadcastForNoInternet();
+            return;
+        }
         beforeWorkInBackground();
         Boolean result = workInBackground(null, aMockResponse.getHttpCode(), aMockResponse.getResponse());
         afterWorkInBackground(result);
@@ -166,7 +170,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             case UNKNOWN:
             case READY_TO_EXECUTE:
             case WAITING_EXECUTION:
-                if (!hasInternet()){
+                if (!hasInternet()) {
                     sendBroadcastForNoInternet();
                     return false;
                 }
