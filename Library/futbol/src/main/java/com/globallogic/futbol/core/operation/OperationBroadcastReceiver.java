@@ -7,20 +7,23 @@ import android.content.IntentFilter;
 
 import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 
 public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     public static final String ACTION_FORMAT = "action:%s_%s_%s";
     protected static final String EXTRA_EXCEPTION = "EXTRA_EXCEPTION";
     private static final String TAG = OperationBroadcastReceiver.class.getSimpleName();
-    private final IOperationReceiver mCallback;
 
-    protected OperationBroadcastReceiver(IOperationReceiver mCallback) {
-        this.mCallback = mCallback;
+    protected OperationBroadcastReceiver() {
     }
 
     public static String getAction(String aClazz, String anAction, String anId) {
         return String.format(ACTION_FORMAT, aClazz, anAction, anId);
+    }
+
+    public static String getActionForNoInternet(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
+                OperationResult.NO_INTERNET.name,
+                aOperation.getId());
     }
 
     public static String getActionForStart(Operation aOperation) {
@@ -39,6 +42,16 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
         return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.ERROR.name,
                 aOperation.getId());
+    }
+
+    public static String getActionForNoInternet(Class aClass) {
+        return getActionForNoInternet(aClass, "");
+    }
+
+    public static String getActionForNoInternet(Class aClass, String aId) {
+        return getAction(aClass.getSimpleName(),
+                OperationResult.NO_INTERNET.name,
+                aId);
     }
 
     public static String getActionForFinish(Operation aOperation) {
@@ -90,8 +103,10 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context aContext, Intent intent) {
         String status = intent.getStringExtra(OperationResult.EXTRA_STATUS);
-        if (OperationResult.START.name.equals(status)) {
-            mCallback.onStartOperation();
+        if (OperationResult.NO_INTERNET.name.equals(status)) {
+            onNoInternet();
+        } else if (OperationResult.START.name.equals(status)) {
+            onStartOperation();
         } else if (OperationResult.FINISH.name.equals(status)) {
             onFinishOperation();
         } else if (OperationResult.OK.name.equals(status)) {
@@ -100,6 +115,16 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
             onResultError(intent);
         }
     }
+
+    /**
+     * It is triggered when the operation can't start because don't have connection
+     */
+    protected abstract void onNoInternet();
+
+    /**
+     * It is triggered when the operation starts
+     */
+    protected abstract void onStartOperation();
 
     /**
      * It is triggered when it was possible to connect to the server
@@ -143,6 +168,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      */
     public void register(Class aClass, String aId) {
         IntentFilter filter = new IntentFilter();
+        filter.addAction(getActionForNoInternet(aClass, aId));
         filter.addAction(getActionForStart(aClass, aId));
         filter.addAction(getActionForOk(aClass, aId));
         filter.addAction(getActionForError(aClass, aId));

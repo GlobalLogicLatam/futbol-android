@@ -1,12 +1,12 @@
 package com.globallogic.futbol.example;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.operation.OperationStatus;
 import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
-import com.globallogic.futbol.example.BuildConfig;
-import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
 import com.globallogic.futbol.example.operations.GetDeviceOperation;
 
@@ -15,7 +15,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowNetworkInfo;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.TimeoutException;
@@ -41,6 +43,24 @@ public class GetDeviceOperationTest {
         mLogger.setLevel(Level.ALL);
     }
     //endregion
+
+    private void setConnectionAs(NetworkInfo.DetailedState disconnected, int typeWifi, int subType, boolean isConnected) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) OperationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifi = ShadowNetworkInfo.newInstance(disconnected, typeWifi, subType, true, isConnected);
+        Shadows.shadowOf(connectivityManager).setActiveNetworkInfo(wifi);
+    }
+
+    private boolean hasInternet() {
+        ConnectivityManager cm = (ConnectivityManager) OperationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return Boolean.FALSE;
+        }
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return Boolean.FALSE;
+        }
+        return networkInfo.isConnected();
+    }
 
     @Before
     public void setUp() {
@@ -68,6 +88,11 @@ public class GetDeviceOperationTest {
                                 mGetDeviceTimeOutOperation.getError(getContext()),
                                 expectedError),
                         mGetDeviceTimeOutOperation.getError(getContext()).equals(expectedError));
+            }
+
+            @Override
+            public void onNoInternet() {
+                assertTrue("This should never happen", false);
             }
 
             @Override
@@ -115,6 +140,11 @@ public class GetDeviceOperationTest {
             }
 
             @Override
+            public void onNoInternet() {
+                assertTrue("This should never happen", false);
+            }
+
+            @Override
             public void onStartOperation() {
             }
         };
@@ -128,6 +158,45 @@ public class GetDeviceOperationTest {
         //region Test
         mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
         assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
+        //endregion
+    }
+
+    @Test
+    public void getDeviceNoInternet() {
+        final String id = "3";
+        //region Setup
+        setConnectionAs(NetworkInfo.DetailedState.DISCONNECTED, ConnectivityManager.TYPE_WIFI, 0, false);
+        final GetDeviceOperation mGetDeviceSuccessOperation = new GetDeviceOperation(id);
+        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceSuccessCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+            @Override
+            public void onSuccess(Device aDevice) {
+                assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onError() {
+                assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onNoInternet() {
+                assertTrue("It was expected that no internet", !hasInternet());
+            }
+
+            @Override
+            public void onStartOperation() {
+            }
+        };
+        final GetDeviceOperation.GetDeviceReceiver mGetDeviceSuccessReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceSuccessCallback);
+        //endregion
+
+        //region Register
+        mGetDeviceSuccessReceiver.register(mGetDeviceSuccessOperation);
+        //endregion
+
+        //region Test
+        mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+        assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceSuccessOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceSuccessOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
         //endregion
     }
 }
