@@ -1,12 +1,12 @@
 package com.globallogic.futbol.example;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.operation.OperationStatus;
 import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
-import com.globallogic.futbol.example.BuildConfig;
-import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
 import com.globallogic.futbol.example.operations.GetDeviceOperation;
 
@@ -42,6 +42,18 @@ public class GetDeviceOperationTest {
     }
     //endregion
 
+    private boolean hasInternet() {
+        ConnectivityManager cm = (ConnectivityManager) OperationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return Boolean.FALSE;
+        }
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return Boolean.FALSE;
+        }
+        return networkInfo.isConnected();
+    }
+
     @Before
     public void setUp() {
     }
@@ -68,6 +80,12 @@ public class GetDeviceOperationTest {
                                 mGetDeviceTimeOutOperation.getError(getContext()),
                                 expectedError),
                         mGetDeviceTimeOutOperation.getError(getContext()).equals(expectedError));
+            }
+
+            @Override
+            public void onNoInternet() {
+                if (hasInternet())
+                    assertTrue("This should never happen", false);
             }
 
             @Override
@@ -112,6 +130,12 @@ public class GetDeviceOperationTest {
             @Override
             public void onError() {
                 assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onNoInternet() {
+                if (hasInternet())
+                    assertTrue("This should never happen", false);
             }
 
             @Override
