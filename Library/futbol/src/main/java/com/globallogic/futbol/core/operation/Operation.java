@@ -101,6 +101,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#afterWorkInBackground(Boolean)
      */
     public void testResponse(Exception anException) {
+        if (!hasInternet()) {
+            sendBroadcastForNoInternet();
+            return;
+        }
         beforeWorkInBackground();
         Boolean result = workInBackground(anException, 0, null);
         afterWorkInBackground(result);
