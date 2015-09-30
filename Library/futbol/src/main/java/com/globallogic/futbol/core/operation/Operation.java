@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
+import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.interfaces.IOperation;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.interfaces.IStrategyCallback;
@@ -52,7 +53,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with an id empty.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -63,7 +64,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with the specified id.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -387,7 +388,8 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             return false;
         } else {
             try {
-                analyzeResult(aHttpCode, aString);
+                if (!analyzeResult(aHttpCode, aString))
+                    throw new UnexpectedResponseException();
             } catch (Exception e2) {
                 mLogger.log(Level.INFO, "Error in analyzeResult: " + e2.getMessage(), e2);
                 analyzeException(e2);

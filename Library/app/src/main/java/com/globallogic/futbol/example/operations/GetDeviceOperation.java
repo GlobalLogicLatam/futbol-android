@@ -47,12 +47,13 @@ public class GetDeviceOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_OK:
                 this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                break;
+                return true;
         }
+        return false;
     }
 
     @Override

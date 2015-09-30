@@ -22,7 +22,8 @@ public class TimeOutOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
+        return true;
     }
 
     @Override

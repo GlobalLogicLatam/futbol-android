@@ -2,6 +2,7 @@ package com.globallogic.futbol.core.operation;
 
 import android.content.Context;
 
+import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -56,6 +57,8 @@ public class OperationHelper {
     public static void analyzeException(Exception exception, ExceptionCallback callback) {
         try {
             throw exception;
+        } catch (UnexpectedResponseException e) {
+            callback.unexpectedResponseException();
         } catch (JsonSyntaxException e) {
             callback.jsonSyntaxException();
         } catch (SocketException e) {
@@ -194,5 +197,7 @@ public class OperationHelper {
         void ioException();
 
         void otherException();
+
+        void unexpectedResponseException();
     }
 }
