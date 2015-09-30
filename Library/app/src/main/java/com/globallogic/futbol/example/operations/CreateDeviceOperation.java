@@ -2,6 +2,7 @@ package com.globallogic.futbol.example.operations;
 
 import android.content.Intent;
 
+import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -10,6 +11,7 @@ import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 import com.globallogic.futbol.example.entities.Device;
 import com.globallogic.futbol.example.operations.helper.ExampleOperation;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
@@ -33,8 +35,10 @@ public class CreateDeviceOperation extends ExampleOperation {
         String resolution = (String) arg[1];
 
         StrategyMock strategyMock = new StrategyMock(0f);
-        strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_CREATED, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-        strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_CREATED, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"2\",\"name\":\"" + name + "\",\"resolution\":\"" + resolution + "\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+        try {
+            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_CREATED, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/CreateDeviceOperation_1.json"), name, resolution)));
+        } catch (IOException e) {
+        }
         return strategyMock;
     }
 
@@ -52,7 +56,7 @@ public class CreateDeviceOperation extends ExampleOperation {
         intent.putExtra(CreateDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface ICreateDeviceReceiver  {
+    public interface ICreateDeviceReceiver {
         void onNoInternet();
 
         void onStartOperation();

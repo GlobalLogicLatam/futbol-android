@@ -1,5 +1,7 @@
 package com.globallogic.futbol.core.operation;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -8,7 +10,10 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -22,6 +27,26 @@ import java.util.concurrent.TimeoutException;
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
 public class OperationHelper {
+
+    /**
+     * Read a text file of the "assets" folder to return its contents
+     *
+     * @param aContext    The context of where you get the resource
+     * @param anAssetPath The path where to get the resource
+     * @throws IOException
+     */
+    public static String assetsReader(Context aContext, String anAssetPath) throws IOException {
+        StringBuilder buf = new StringBuilder();
+        InputStream stream = aContext.getAssets().open(anAssetPath);
+        BufferedReader in = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        String str;
+        while ((str = in.readLine()) != null) {
+            buf.append(str);
+        }
+        in.close();
+        return buf.toString();
+    }
+
     /**
      * Basic analysis of the different types of most common exceptions.
      *
