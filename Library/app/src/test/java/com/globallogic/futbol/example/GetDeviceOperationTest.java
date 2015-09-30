@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.text.TextUtils;
 
 import com.globallogic.futbol.core.OperationApp;
+import com.globallogic.futbol.core.operation.OperationHelper;
 import com.globallogic.futbol.core.operation.OperationStatus;
 import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 import com.globallogic.futbol.example.entities.Device;
@@ -20,6 +21,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -169,8 +171,13 @@ public class GetDeviceOperationTest {
         //endregion
 
         //region Test
-        mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-        assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
+        try {
+            String json = String.format(OperationHelper.assetsReader(getContext(), "json/test/GetDeviceOperationTest.json"), id);
+            mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
+            assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), false);
+        }
         //endregion
     }
 
@@ -214,8 +221,13 @@ public class GetDeviceOperationTest {
         //endregion
 
         //region Test
-        mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-        assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceSuccessOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceSuccessOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
+        try {
+            String json = String.format(OperationHelper.assetsReader(getContext(), "json/test/GetDeviceOperationTest.json"), id);
+            mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
+            assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceSuccessOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceSuccessOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), false);
+        }
         //endregion
     }
 }

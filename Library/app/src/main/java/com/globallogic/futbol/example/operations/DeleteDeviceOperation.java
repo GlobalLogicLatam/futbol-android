@@ -2,6 +2,7 @@ package com.globallogic.futbol.example.operations;
 
 import android.content.Intent;
 
+import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -10,6 +11,7 @@ import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 import com.globallogic.futbol.example.entities.Device;
 import com.globallogic.futbol.example.operations.helper.ExampleOperation;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
@@ -34,9 +36,11 @@ public class DeleteDeviceOperation extends ExampleOperation {
         String id = (String) arg[0];
 
         StrategyMock strategyMock = new StrategyMock(0f);
-        strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
-        strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-        strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+        try {
+            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
+            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/DeleteDeviceOperation_1.json"), id)));
+        } catch (IOException e) {
+        }
         return strategyMock;
     }
 
