@@ -3,6 +3,7 @@ package com.globallogic.futbol.example;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.text.TextUtils;
 
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.operation.OperationStatus;
@@ -91,6 +92,12 @@ public class GetDeviceOperationTest {
             }
 
             @Override
+            public void onFinishOperation() {
+                assertTrue("The operation must be some mistake.",
+                        !TextUtils.isEmpty(mGetDeviceTimeOutOperation.getError(getContext())));
+            }
+
+            @Override
             public void onNoInternet() {
                 assertTrue("This should never happen", false);
             }
@@ -140,6 +147,12 @@ public class GetDeviceOperationTest {
             }
 
             @Override
+            public void onFinishOperation() {
+                assertTrue("The operation must not have any error.",
+                        !TextUtils.isEmpty(mGetDeviceSuccessOperation.getError(getContext())));
+            }
+
+            @Override
             public void onNoInternet() {
                 assertTrue("This should never happen", false);
             }
@@ -176,6 +189,12 @@ public class GetDeviceOperationTest {
             @Override
             public void onError() {
                 assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onFinishOperation() {
+                assertTrue("The operation must not have any error.",
+                        !TextUtils.isEmpty(mGetDeviceSuccessOperation.getError(getContext())));
             }
 
             @Override

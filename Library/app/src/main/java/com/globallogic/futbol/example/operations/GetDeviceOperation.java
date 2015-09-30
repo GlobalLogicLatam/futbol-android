@@ -64,6 +64,8 @@ public class GetDeviceOperation extends ExampleOperation {
         void onSuccess(Device aDevice);
 
         void onError();
+
+        void onFinishOperation();
     }
 
     public static class GetDeviceReceiver extends OperationBroadcastReceiver {
@@ -95,6 +97,11 @@ public class GetDeviceOperation extends ExampleOperation {
 
         protected void onResultError(Intent anIntent) {
             mCallback.onError();
+        }
+
+        @Override
+        protected void onFinishOperation() {
+            mCallback.onFinishOperation();
         }
     }
 }
