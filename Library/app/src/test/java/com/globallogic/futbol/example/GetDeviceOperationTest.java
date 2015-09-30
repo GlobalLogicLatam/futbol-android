@@ -186,8 +186,8 @@ public class GetDeviceOperationTest {
         final String id = "3";
         //region Setup
         setConnectionAs(NetworkInfo.DetailedState.DISCONNECTED, ConnectivityManager.TYPE_WIFI, 0, false);
-        final GetDeviceOperation mGetDeviceSuccessOperation = new GetDeviceOperation(id);
-        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceSuccessCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+        final GetDeviceOperation mGetDeviceNoInternetOperation = new GetDeviceOperation(id);
+        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceNoInternetCallback = new GetDeviceOperation.IGetDeviceReceiver() {
             @Override
             public void onSuccess(Device aDevice) {
                 assertTrue("This should never happen", false);
@@ -201,7 +201,7 @@ public class GetDeviceOperationTest {
             @Override
             public void onFinishOperation() {
                 assertTrue("The operation must not have any error.",
-                        !TextUtils.isEmpty(mGetDeviceSuccessOperation.getError(getContext())));
+                        !TextUtils.isEmpty(mGetDeviceNoInternetOperation.getError(getContext())));
             }
 
             @Override
@@ -213,21 +213,69 @@ public class GetDeviceOperationTest {
             public void onStartOperation() {
             }
         };
-        final GetDeviceOperation.GetDeviceReceiver mGetDeviceSuccessReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceSuccessCallback);
+        final GetDeviceOperation.GetDeviceReceiver mGetDeviceNoInternetReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceNoInternetCallback);
         //endregion
 
         //region Register
-        mGetDeviceSuccessReceiver.register(mGetDeviceSuccessOperation);
+        mGetDeviceNoInternetReceiver.register(mGetDeviceNoInternetOperation);
         //endregion
 
         //region Test
         try {
             String json = String.format(OperationHelper.assetsReader(getContext(), "json/test/GetDeviceOperationTest.json"), id);
-            mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
-            assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceSuccessOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceSuccessOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
+            mGetDeviceNoInternetOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
+            assertTrue(mGetDeviceNoInternetOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceNoInternetOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceNoInternetOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
         } catch (IOException e) {
             assertTrue(e.getMessage(), false);
         }
+        //endregion
+    }
+
+    @Test
+    public void getDeviceUnexpectedResponse() {
+        final String id = "4";
+        //region Setup
+        final GetDeviceOperation mGetDeviceUnexpectedResponseOperation = new GetDeviceOperation(id);
+        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceUnexpectedResponseCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+            @Override
+            public void onSuccess(Device aDevice) {
+                assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onError() {
+                String expectedError = getContext().getString(R.string.error_unexpected_response_exception);
+                assertTrue(String.format("The error was \"%s\" and was expected \"%s\"",
+                                mGetDeviceUnexpectedResponseOperation.getError(getContext()),
+                                expectedError),
+                        mGetDeviceUnexpectedResponseOperation.getError(getContext()).equals(expectedError));
+            }
+
+            @Override
+            public void onFinishOperation() {
+                assertTrue("The operation must be some mistake.",
+                        !TextUtils.isEmpty(mGetDeviceUnexpectedResponseOperation.getError(getContext())));
+            }
+
+            @Override
+            public void onNoInternet() {
+                assertTrue("This should never happen", false);
+            }
+
+            @Override
+            public void onStartOperation() {
+            }
+        };
+        final GetDeviceOperation.GetDeviceReceiver mGetDeviceUnexpectedResponseReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceUnexpectedResponseCallback);
+        //endregion
+
+        //region Register
+        mGetDeviceUnexpectedResponseReceiver.register(mGetDeviceUnexpectedResponseOperation);
+        //endregion
+
+        //region Test
+        mGetDeviceUnexpectedResponseOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_NO_CONTENT, ""));
+        assertTrue(mGetDeviceUnexpectedResponseOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
         //endregion
     }
 }

@@ -19,7 +19,7 @@ public interface IOperation {
      * This allows you to analyze the http code and save the objects according to code.
      * Is triggered only if you can connect to the server.
      */
-    void analyzeResult(int aHttpCode, String result);
+    Boolean analyzeResult(int aHttpCode, String result);
 
     /**
      * This allows you to analyze the exception occurred.

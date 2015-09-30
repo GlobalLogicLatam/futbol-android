@@ -70,6 +70,11 @@ public abstract class ExampleOperation extends Operation {
             public void otherException() {
                 errorResource = R.string.error_other_exception;
             }
+
+            @Override
+            public void unexpectedResponseException() {
+                errorResource = R.string.error_unexpected_response_exception;
+            }
         });
     }
 
