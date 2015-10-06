@@ -2,7 +2,6 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -34,6 +33,11 @@ public class CreateDeviceOperation extends ExampleOperation {
         mDevice = null;
     }
 
+    public void execute (String name, String resolution){
+        reset();
+        performOperation(name, resolution);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String name = (String) arg[0];
@@ -54,12 +58,13 @@ public class CreateDeviceOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_CREATED:
                 this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                break;
+                return true;
         }
+        return false;
     }
 
     @Override
@@ -67,7 +72,11 @@ public class CreateDeviceOperation extends ExampleOperation {
         intent.putExtra(CreateDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface ICreateDeviceReceiver extends IOperationReceiver {
+    public interface ICreateDeviceReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess(Device aDevice);
 
         void onError();
@@ -78,8 +87,18 @@ public class CreateDeviceOperation extends ExampleOperation {
         private final ICreateDeviceReceiver mCallback;
 
         public CreateDeviceReceiver(ICreateDeviceReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onNoInternet();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

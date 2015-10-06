@@ -11,8 +11,8 @@ def getVersionName() {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 22
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         minSdkVersion 16
@@ -30,7 +30,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.globallogic:futbol:0.1.+'
+    compile 'com.globallogic:futbol:0.2.+'
     compile 'com.android.support:support-v4:22.+'
     compile 'com.koushikdutta.ion:ion:2.+'
 }

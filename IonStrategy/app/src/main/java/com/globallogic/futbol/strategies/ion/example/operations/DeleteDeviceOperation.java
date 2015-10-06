@@ -2,14 +2,12 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
 import com.globallogic.futbol.core.operation.strategies.StrategyMock;
 import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringDelete;
-import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringGet;
 import com.globallogic.futbol.strategies.ion.example.BuildConfig;
 import com.globallogic.futbol.strategies.ion.example.entities.Device;
 import com.globallogic.futbol.strategies.ion.example.operations.helper.ExampleOperation;
@@ -36,6 +34,11 @@ public class DeleteDeviceOperation extends ExampleOperation {
         mNotFound = false;
     }
 
+    public void execute(String id) {
+        reset();
+        performOperation(id);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String id = (String) arg[0];
@@ -53,15 +56,16 @@ public class DeleteDeviceOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_NOT_FOUND:
                 this.mNotFound = true;
-                break;
+                return true;
             case HttpURLConnection.HTTP_OK:
                 this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                break;
+                return true;
         }
+        return false;
     }
 
     @Override
@@ -72,7 +76,11 @@ public class DeleteDeviceOperation extends ExampleOperation {
             intent.putExtra(DeleteDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface IDeleteDeviceReceiver extends IOperationReceiver {
+    public interface IDeleteDeviceReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess(Device aDevice);
 
         void onError();
@@ -86,8 +94,18 @@ public class DeleteDeviceOperation extends ExampleOperation {
         private final IDeleteDeviceReceiver mCallback;
 
         public DeleteDeviceReceiver(IDeleteDeviceReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onNoInternet();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

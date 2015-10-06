@@ -2,7 +2,6 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -36,6 +35,11 @@ public class UpdateDeviceOperation extends ExampleOperation {
         mNotFound = false;
     }
 
+    public void execute (String id, String name, String resolution){
+        reset();
+        performOperation(id, name, resolution);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String id = (String) arg[0];
@@ -58,15 +62,16 @@ public class UpdateDeviceOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_NOT_FOUND:
                 this.mNotFound = true;
-                break;
+                return true;
             case HttpURLConnection.HTTP_OK:
                 this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                break;
+                return true;
         }
+        return false;
     }
 
     @Override
@@ -77,7 +82,11 @@ public class UpdateDeviceOperation extends ExampleOperation {
             intent.putExtra(UpdateDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface IUpdateDeviceReceiver extends IOperationReceiver {
+    public interface IUpdateDeviceReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess(Device aDevice);
 
         void onError();
@@ -91,8 +100,18 @@ public class UpdateDeviceOperation extends ExampleOperation {
         private final IUpdateDeviceReceiver mCallback;
 
         public UpdateDeviceReceiver(IUpdateDeviceReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onNoInternet();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.globallogic.futbol.strategies.ion.example.R;
 import com.globallogic.futbol.strategies.ion.example.entities.Device;
@@ -41,6 +42,11 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
     private void enableButtons(boolean value) {
         vId.setEnabled(value);
         vSubmit.setEnabled(value);
+    }
+
+    @Override
+    public void onNoInternet() {
+        Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -114,7 +120,7 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
 
     private void submit() {
         if (checkRequiredField(vId)) {
-                mDeleteDeviceOperation.performOperation(vId.getText().toString());
+                mDeleteDeviceOperation.execute(vId.getText().toString());
         }
     }
 

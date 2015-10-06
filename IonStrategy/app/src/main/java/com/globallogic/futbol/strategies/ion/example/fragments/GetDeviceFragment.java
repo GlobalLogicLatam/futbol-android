@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.globallogic.futbol.strategies.ion.example.R;
 import com.globallogic.futbol.strategies.ion.example.entities.Device;
@@ -32,6 +33,11 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
         String id = "1";
         mGetDeviceOperation = new GetDeviceOperation(id);
         mGetDeviceReceiver = new GetDeviceOperation.GetDeviceReceiver(this);
+    }
+
+    @Override
+    public void onNoInternet() {
+        Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -76,7 +82,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
     }
 
     private void submit() {
-        mGetDeviceOperation.performOperation();
+        mGetDeviceOperation.execute();
     }
 
     private void updateOperationStatus() {

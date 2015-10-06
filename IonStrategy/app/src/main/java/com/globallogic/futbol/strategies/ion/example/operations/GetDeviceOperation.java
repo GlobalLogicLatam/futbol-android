@@ -2,7 +2,6 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
@@ -39,6 +38,10 @@ public class GetDeviceOperation extends ExampleOperation {
         mDevice = null;
     }
 
+    public void execute () {
+        performOperation();
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         if (mock) {
@@ -53,12 +56,13 @@ public class GetDeviceOperation extends ExampleOperation {
     }
 
     @Override
-    public void analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_OK:
                 this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                break;
+                return true;
         }
+        return false;
     }
 
     @Override
@@ -66,7 +70,11 @@ public class GetDeviceOperation extends ExampleOperation {
         intent.putExtra(GetDeviceReceiver.EXTRA_DEVICE, mDevice);
     }
 
-    public interface IGetDeviceReceiver extends IOperationReceiver {
+    public interface IGetDeviceReceiver {
+        void onNoInternet();
+
+        void onStartOperation();
+
         void onSuccess(Device aDevice);
 
         void onError();
@@ -77,8 +85,18 @@ public class GetDeviceOperation extends ExampleOperation {
         private final IGetDeviceReceiver mCallback;
 
         public GetDeviceReceiver(IGetDeviceReceiver callback) {
-            super(callback);
+            super();
             mCallback = callback;
+        }
+
+        @Override
+        protected void onNoInternet() {
+            mCallback.onStartOperation();
+        }
+
+        @Override
+        protected void onStartOperation() {
+            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

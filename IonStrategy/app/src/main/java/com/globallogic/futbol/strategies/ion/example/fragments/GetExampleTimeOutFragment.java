@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.globallogic.futbol.strategies.ion.example.R;
 import com.globallogic.futbol.strategies.ion.example.operations.TimeOutOperation;
@@ -30,6 +31,11 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
     public GetExampleTimeOutFragment() {
         mTimeOutOperation = new TimeOutOperation();
         mTimeOutReceiver = new TimeOutOperation.TimeOutReceiver(this);
+    }
+
+    @Override
+    public void onNoInternet() {
+        Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -74,7 +80,7 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
     }
 
     private void submit() {
-        mTimeOutOperation.performOperation();
+        mTimeOutOperation.execute();
     }
 
     private void updateOperationStatus() {
