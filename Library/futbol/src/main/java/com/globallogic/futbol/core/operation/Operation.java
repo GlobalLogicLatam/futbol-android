@@ -18,7 +18,6 @@ import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +26,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     private static final String TAG = Operation.class.getSimpleName();
     private static final String SAVE_INSTANCE_TIME_INIT = "SAVE_INSTANCE_TIME_INIT";
     private static final String SAVE_INSTANCE_ID = "SAVE_INSTANCE_ID";
+    private static final String SAVE_INSTANCE_RESULT = "SAVE_INSTANCE_RESULT";
     private static final String SAVE_INSTANCE_STATE = "SAVE_INSTANCE_STATE";
     private static final String SAVE_INSTANCE_STRATEGY = "SAVE_INSTANCE_STRATEGY";
     //endregion
@@ -47,13 +47,14 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     private OperationStatus mOperationStatus;
     private IOperationStrategy mStrategy;
+    private Boolean mResult;
     //endregion
 
     //region Constructors
 
     /**
      * Create a new instance with an id empty.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -64,12 +65,13 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     /**
      * Create a new instance with the specified id.
-     * <p>
+     * <p/>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
      */
     protected Operation(String id) {
+        mLogger.info(String.format("Constructor with id: %s", id));
         this.id = id;
         reset();
     }
@@ -84,14 +86,28 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#workInBackground(Exception, int, String)
      * @see Operation#afterWorkInBackground(Boolean)
      */
-    public void testResponse(StrategyMockResponse aMockResponse) {
-        if (!hasInternet()) {
-            sendBroadcastForNoInternet();
-            return;
+    public Boolean testResponse(StrategyMockResponse aMockResponse) {
+        mLogger.info(String.format("Test response: %s", aMockResponse.toString()));
+        switch (mOperationStatus) {
+            default:
+            case UNKNOWN:
+            case READY_TO_EXECUTE:
+            case WAITING_EXECUTION:
+                if (!hasInternet()) {
+                    sendBroadcastForNoInternet();
+                    return false;
+                }
+                beforeWorkInBackground();
+                Boolean result = workInBackground(null, aMockResponse.getHttpCode(), aMockResponse.getResponse());
+                afterWorkInBackground(result);
+                return true;
+            case FINISHED_EXECUTION:
+                afterWorkInBackgroundBroadcasts(mResult);
+                return false;
+            case DOING_EXECUTION:
+                beforeWorkInBackgroundBroadcasts();
+                return false;
         }
-        beforeWorkInBackground();
-        Boolean result = workInBackground(null, aMockResponse.getHttpCode(), aMockResponse.getResponse());
-        afterWorkInBackground(result);
     }
 
     /**
@@ -101,14 +117,28 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#workInBackground(Exception, int, String)
      * @see Operation#afterWorkInBackground(Boolean)
      */
-    public void testResponse(Exception anException) {
-        if (!hasInternet()) {
-            sendBroadcastForNoInternet();
-            return;
+    public Boolean testResponse(Exception anException) {
+        mLogger.info(String.format("Test response: %s", anException.getClass().getName()));
+        switch (mOperationStatus) {
+            default:
+            case UNKNOWN:
+            case READY_TO_EXECUTE:
+            case WAITING_EXECUTION:
+                if (!hasInternet()) {
+                    sendBroadcastForNoInternet();
+                    return false;
+                }
+                beforeWorkInBackground();
+                Boolean result = workInBackground(anException, 0, null);
+                afterWorkInBackground(result);
+                return true;
+            case FINISHED_EXECUTION:
+                afterWorkInBackgroundBroadcasts(mResult);
+                return false;
+            case DOING_EXECUTION:
+                beforeWorkInBackgroundBroadcasts();
+                return false;
         }
-        beforeWorkInBackground();
-        Boolean result = workInBackground(anException, 0, null);
-        afterWorkInBackground(result);
     }
     //endregion
 
@@ -125,11 +155,11 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      */
     public void parseResponse(final Exception aException, final int aHttpCode, final String aString) {
         if (aException != null)
-            mLogger.log(Level.SEVERE, aException.getMessage(), aException);
+            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
         if (TextUtils.isEmpty(aString) || !(aString.startsWith("{") || aString.startsWith("[")))
-            mLogger.severe("Result: " + aString);
+            mLogger.severe(String.format("Parsing response: %s", aString));
         else
-            mLogger.info("Result: " + aString);
+            mLogger.info(String.format("Parsing response: %s", aString));
 
         // Parse and analyze
         new AsyncTask<Void, Void, Boolean>() {
@@ -155,6 +185,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      */
     @Override
     public IOperation setAsWaiting() {
+        mLogger.info("Setting as waiting");
         mOperationStatus = OperationStatus.WAITING_EXECUTION;
         return this;
     }
@@ -170,6 +201,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      */
     @Override
     public boolean performOperation(Object... arg) {
+        mLogger.info(String.format("Performing operation. Status: %s", mOperationStatus.name()));
         switch (mOperationStatus) {
             default:
             case UNKNOWN:
@@ -187,9 +219,10 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
                 }
                 return true;
             case FINISHED_EXECUTION:
-                reset();
-                return performOperation(arg);
+                afterWorkInBackgroundBroadcasts(mResult);
+                return false;
             case DOING_EXECUTION:
+                beforeWorkInBackgroundBroadcasts();
                 return false;
         }
     }
@@ -197,13 +230,20 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     private boolean hasInternet() {
         ConnectivityManager cm = (ConnectivityManager) OperationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm == null) {
+            mLogger.info("No internet");
             return Boolean.FALSE;
         }
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         if (networkInfo == null) {
+            mLogger.info("No internet");
             return Boolean.FALSE;
         }
-        return networkInfo.isConnected();
+        boolean connected = networkInfo.isConnected();
+        if (connected)
+            mLogger.info("No internet");
+        else
+            mLogger.info("Has internet");
+        return connected;
     }
 
     //region Broadcast
@@ -221,6 +261,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     protected abstract void addExtrasForResultError(Intent intent);
 
     public void sendBroadcastForNoInternet() {
+        mLogger.info("Sending broadcast for no internet");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.NO_INTERNET.name);
 
@@ -236,6 +277,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     }
 
     public void sendBroadcastForStart() {
+        mLogger.info("Sending broadcast for start");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.START.name);
 
@@ -251,6 +293,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     }
 
     public void sendBroadcastForOk() {
+        mLogger.info("Sending broadcast for success");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.OK.name);
         addExtrasForResultOk(intent);
@@ -267,6 +310,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     }
 
     public void sendBroadcastForError() {
+        mLogger.info("Sending broadcast for error");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.ERROR.name);
         addExtrasForResultError(intent);
@@ -283,6 +327,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     }
 
     public void sendBroadcastForFinish() {
+        mLogger.info("Sending broadcast for finished");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_STATUS, OperationResult.FINISH.name);
 
@@ -305,6 +350,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * Returns to the original state of the operation
      */
     public void reset() {
+        mLogger.info("Resetting");
         mOperationStatus = OperationStatus.READY_TO_EXECUTE;
     }
 
@@ -314,6 +360,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see IOperationStrategy
      */
     private void doRequest(Object... arg) {
+        mLogger.info("Doing request");
         mStrategy = getStrategy(arg);
         mStrategy.doRequest(this);
     }
@@ -326,11 +373,12 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#doRequest(Object...)
      */
     private void simulateWaiting(final Object... arg) {
+        mLogger.info("Simulating waiting");
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    Thread.sleep(new Random().nextInt(mConnectionDelay.intValue()));
+                    Thread.sleep(mConnectionDelay.intValue());
                 } catch (InterruptedException e) {
                 }
                 return null;
@@ -339,6 +387,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+                mLogger.info("Finished simulating waiting");
                 doRequest(arg);
             }
         }.execute((Void) null);
@@ -350,6 +399,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @param duration The duration of the request from which start until finish
      */
     protected void onOperationFinish(Long duration) {
+        mLogger.info("On operation finish");
     }
     //endregion
 
@@ -368,8 +418,13 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#sendBroadcastForStart()
      */
     private void beforeWorkInBackground() {
+        mLogger.info("Before work in background");
         mOperationStatus = OperationStatus.DOING_EXECUTION;
         timeInit = Calendar.getInstance().getTimeInMillis();
+        beforeWorkInBackgroundBroadcasts();
+    }
+
+    private void beforeWorkInBackgroundBroadcasts() {
         sendBroadcastForStart();
     }
 
@@ -383,6 +438,7 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
      * @see Operation#analyzeResult(int, String)
      */
     private Boolean workInBackground(Exception anException, int aHttpCode, String aString) {
+        mLogger.info("Work in background");
         if (anException != null) {
             analyzeException(anException);
             return false;
@@ -400,20 +456,31 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
     }
 
     /**
-     * Update the variables and send the broadcast to notify that the operation finished
+     * Update the variables
      *
      * @param aResult Boolean that notify the result of the operation
-     * @see Operation#onOperationFinish(Long)
-     * @see Operation#sendBroadcastForOk()
-     * @see Operation#sendBroadcastForError()
      */
     private void afterWorkInBackground(Boolean aResult) {
+        mLogger.info("After work in background");
+        mResult = aResult;
         mOperationStatus = OperationStatus.FINISHED_EXECUTION;
         if (timeInit != null) {
             long timeFinish = Calendar.getInstance().getTimeInMillis();
             long difference = timeFinish - timeInit;
             onOperationFinish(difference);
         }
+        afterWorkInBackgroundBroadcasts(aResult);
+    }
+
+    /**
+     * Send the broadcast to notify that the operation finished
+     *
+     * @param aResult Boolean that notify the result of the operation
+     * @see Operation#onOperationFinish(Long)
+     * @see Operation#sendBroadcastForOk()
+     * @see Operation#sendBroadcastForError()
+     */
+    private void afterWorkInBackgroundBroadcasts(Boolean aResult) {
         if (aResult) {
             sendBroadcastForOk();
         } else {
@@ -425,22 +492,27 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
 
     //region Android lifecycle
     public void onCreate(Bundle savedInstanceState) {
+        mLogger.info("On create");
         if (savedInstanceState != null)
             //Restauro los datos necesario de la operacion
             onRestoreInstanceState(savedInstanceState);
     }
 
     public void onSaveInstanceState(Bundle outState) {
+        mLogger.info("On save instance state");
         if (timeInit != null)
             outState.putLong(SAVE_INSTANCE_TIME_INIT, timeInit);
         outState.putString(SAVE_INSTANCE_ID, id);
 
+        if (mResult != null)
+            outState.putSerializable(SAVE_INSTANCE_RESULT, mResult);
         outState.putSerializable(SAVE_INSTANCE_STATE, mOperationStatus);
         if (mStrategy != null)
             outState.putSerializable(SAVE_INSTANCE_STRATEGY, mStrategy);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mLogger.info("On restore instance state");
         id = savedInstanceState.getString(SAVE_INSTANCE_ID);
         mOperationStatus = (OperationStatus) savedInstanceState.getSerializable(SAVE_INSTANCE_STATE);
         if (savedInstanceState.containsKey(SAVE_INSTANCE_STRATEGY)) {
@@ -449,6 +521,8 @@ public abstract class Operation implements Serializable, IOperation, IStrategyCa
         }
         if (savedInstanceState.containsKey(SAVE_INSTANCE_TIME_INIT))
             timeInit = savedInstanceState.getLong(SAVE_INSTANCE_TIME_INIT);
+        if (savedInstanceState.containsKey(SAVE_INSTANCE_RESULT))
+            mResult = savedInstanceState.getBoolean(SAVE_INSTANCE_RESULT);
     }
     //endregion
 

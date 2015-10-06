@@ -8,7 +8,7 @@ import java.util.Date;
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
 public class Device implements Serializable {
-    private String id;
+    private Integer id;
     private Date createdAt;
     private Date updatedAt;
     private String name;
@@ -17,11 +17,11 @@ public class Device implements Serializable {
     public Device() {
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -55,6 +55,26 @@ public class Device implements Serializable {
 
     public void setResolution(String resolution) {
         this.resolution = resolution;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Device device = (Device) o;
+
+        if (id != null && device.id != null) return id.equals(device.id);
+        if (name != null && device.name != null) return name.equals(device.name);
+        return false;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
     }
 
     @Override

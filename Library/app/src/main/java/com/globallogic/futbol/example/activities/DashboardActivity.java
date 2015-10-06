@@ -12,6 +12,7 @@ import com.globallogic.futbol.example.fragments.CreateDeviceFragment;
 import com.globallogic.futbol.example.fragments.DeleteDeviceFragment;
 import com.globallogic.futbol.example.fragments.DeletePageFragment;
 import com.globallogic.futbol.example.fragments.GetDeviceFragment;
+import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
 import com.globallogic.futbol.example.fragments.GetPageFragment;
 import com.globallogic.futbol.example.fragments.PostPageFragment;
@@ -44,6 +45,13 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
         startActivity(GenericExampleActivity.generateIntent(this, tag));
     }
 
+    @Override
+    public void onExampleGetListSuccess() {
+        if (isTwoPane)
+            addFragment(GetDevicesFragment.newInstance(), GetDevicesFragment.TAG);
+        else
+            startActivity(GetDevicesFragment.TAG);
+    }
     @Override
     public void onExampleGetSuccess() {
         if (isTwoPane)

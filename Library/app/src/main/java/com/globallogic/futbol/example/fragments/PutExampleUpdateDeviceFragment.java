@@ -126,7 +126,7 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
 
     private void submit() {
         if (checkRequiredField(vId) && checkRequiredField(vName) && checkRequiredField(vResolution)) {
-            mUpdateDeviceOperation.performOperation(vId.getText().toString(), vName.getText().toString(), vResolution.getText().toString());
+            mUpdateDeviceOperation.execute(vId.getText().toString(), vName.getText().toString(), vResolution.getText().toString());
         }
     }
 

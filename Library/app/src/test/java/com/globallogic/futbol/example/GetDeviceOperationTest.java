@@ -75,7 +75,7 @@ public class GetDeviceOperationTest {
 
     @Test
     public void getDeviceTimeout() {
-        final String id = "1";
+        final Integer id = 1;
         //region Setup
         final GetDeviceOperation mGetDeviceTimeOutOperation = new GetDeviceOperation(id);
         final GetDeviceOperation.IGetDeviceReceiver mGetDeviceTimeOutCallback = new GetDeviceOperation.IGetDeviceReceiver() {
@@ -123,7 +123,7 @@ public class GetDeviceOperationTest {
 
     @Test
     public void getDeviceSuccess() {
-        final String id = "2";
+        final Integer id = 2;
         //region Setup
         final GetDeviceOperation mGetDeviceSuccessOperation = new GetDeviceOperation(id);
         final GetDeviceOperation.IGetDeviceReceiver mGetDeviceSuccessCallback = new GetDeviceOperation.IGetDeviceReceiver() {
@@ -183,7 +183,7 @@ public class GetDeviceOperationTest {
 
     @Test
     public void getDeviceNoInternet() {
-        final String id = "3";
+        final Integer id = 3;
         //region Setup
         setConnectionAs(NetworkInfo.DetailedState.DISCONNECTED, ConnectivityManager.TYPE_WIFI, 0, false);
         final GetDeviceOperation mGetDeviceNoInternetOperation = new GetDeviceOperation(id);
@@ -233,7 +233,7 @@ public class GetDeviceOperationTest {
 
     @Test
     public void getDeviceUnexpectedResponse() {
-        final String id = "4";
+        final Integer id = 4;
         //region Setup
         final GetDeviceOperation mGetDeviceUnexpectedResponseOperation = new GetDeviceOperation(id);
         final GetDeviceOperation.IGetDeviceReceiver mGetDeviceUnexpectedResponseCallback = new GetDeviceOperation.IGetDeviceReceiver() {

@@ -10,6 +10,7 @@ import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.fragments.CreateDeviceFragment;
 import com.globallogic.futbol.example.fragments.DeleteDeviceFragment;
 import com.globallogic.futbol.example.fragments.GetDeviceFragment;
+import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 
@@ -32,6 +33,9 @@ public class GenericExampleActivity extends Activity {
             String tag = getIntent().getStringExtra(EXTRA_TAG);
             Fragment fragment = null;
             switch (tag) {
+                case GetDevicesFragment.TAG:
+                    fragment = GetDevicesFragment.newInstance();
+                    break;
                 case GetDeviceFragment.TAG:
                     fragment = GetDeviceFragment.newInstance();
                     break;

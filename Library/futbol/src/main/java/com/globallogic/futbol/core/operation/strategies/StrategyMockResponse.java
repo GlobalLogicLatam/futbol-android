@@ -35,4 +35,12 @@ public class StrategyMockResponse implements Serializable {
     public void setResponse(String response) {
         this.response = response;
     }
+
+    @Override
+    public String toString() {
+        return "StrategyMockResponse{" +
+                "httpCode=" + httpCode +
+                ", response='" + response + '\'' +
+                '}';
+    }
 }

@@ -29,6 +29,11 @@ public class CreateDeviceOperation extends ExampleOperation {
         mDevice = null;
     }
 
+    public void execute(String name, String resolution) {
+        reset();
+        performOperation(name, resolution);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String name = (String) arg[0];

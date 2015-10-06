@@ -119,7 +119,7 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
 
     private void submit() {
         if (checkRequiredField(vId)) {
-            mDeleteDeviceOperation.performOperation(vId.getText().toString());
+            mDeleteDeviceOperation.execute(vId.getText().toString());
         }
     }
 

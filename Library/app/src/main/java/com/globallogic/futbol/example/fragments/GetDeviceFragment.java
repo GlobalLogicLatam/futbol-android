@@ -25,7 +25,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
     private TextView vOperationResult;
 
     public GetDeviceFragment() {
-        String id = "1";
+        Integer id = 1;
         mGetDeviceOperation = new GetDeviceOperation(id);
         mGetDeviceReceiver = new GetDeviceOperation.GetDeviceReceiver(this);
     }
@@ -80,11 +80,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        submit();
-    }
-
-    private void submit() {
-        mGetDeviceOperation.performOperation();
+        mGetDeviceOperation.execute();
     }
 
     private void updateOperationStatus() {

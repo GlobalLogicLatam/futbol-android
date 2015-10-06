@@ -1,0 +1,16 @@
+[
+  {
+    "createdAt": "2015-08-05T11:14:45.374Z",
+    "id": "1",
+    "name": "Samsung S3",
+    "resolution": "720x1280",
+    "updatedAt": "2015-08-05T11:14:45.374Z"
+  },
+  {
+    "createdAt": "2015-08-05T11:14:45.374Z",
+    "id": "2",
+    "name": "Motorola Moto G",
+    "resolution": "720x1280",
+    "updatedAt": "2015-08-05T11:14:45.374Z"
+  }
+]
