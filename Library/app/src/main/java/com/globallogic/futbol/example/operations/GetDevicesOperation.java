@@ -14,28 +14,26 @@ import com.globallogic.futbol.example.operations.helper.ExampleOperation;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 /**
  * Created by Facundo Mengoni on 8/6/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class GetDeviceOperation extends ExampleOperation {
-    private static final String TAG = GetDeviceOperation.class.getSimpleName();
-    private static final String SAVE_INSTANCE_DEVICE = "SAVE_INSTANCE_DEVICE";
+public class GetDevicesOperation extends ExampleOperation {
+    private static final String TAG = GetDevicesOperation.class.getSimpleName();
+    private static final String SAVE_INSTANCE_DEVICES = "SAVE_INSTANCE_DEVICES";
 
-    private final Integer mId;
+    private ArrayList<Device> mList;
 
-    private Device mDevice;
-
-    public GetDeviceOperation(Integer anId) {
-        super(anId.toString());
-        mId = anId;
+    public GetDevicesOperation(String anId) {
+        super(anId);
     }
 
     @Override
     public void reset() {
         super.reset();
-        mDevice = null;
+        mList = null;
     }
 
     public void execute() {
@@ -46,16 +44,7 @@ public class GetDeviceOperation extends ExampleOperation {
     protected IOperationStrategy getStrategy(Object... arg) {
         StrategyMock strategyMock = new StrategyMock(0f);
         try {
-            String name = "";
-            switch (mId) {
-                case 1:
-                    name = "S3";
-                    break;
-                case 2:
-                    name = "Moto G";
-                    break;
-            }
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/GetDeviceOperation_1.json"), mId, name)));
+            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, OperationHelper.assetsReader(OperationApp.getInstance(), "json/GetDevicesOperation_1.json")));
         } catch (IOException e) {
         }
         return strategyMock;
@@ -65,7 +54,7 @@ public class GetDeviceOperation extends ExampleOperation {
     public Boolean analyzeResult(int aHttpCode, String result) {
         switch (aHttpCode) {
             case HttpURLConnection.HTTP_OK:
-                this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
+                this.mList = OperationHelper.getModelArray(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
                 return true;
         }
         return false;
@@ -74,39 +63,45 @@ public class GetDeviceOperation extends ExampleOperation {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mDevice != null)
-            outState.putSerializable(SAVE_INSTANCE_DEVICE, mDevice);
+        if (mList != null)
+            outState.putSerializable(SAVE_INSTANCE_DEVICES, mList);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(SAVE_INSTANCE_DEVICE))
-            mDevice = (Device) savedInstanceState.getSerializable(SAVE_INSTANCE_DEVICE);
+        if (savedInstanceState.containsKey(SAVE_INSTANCE_DEVICES))
+            mList = (ArrayList<Device>) savedInstanceState.getSerializable(SAVE_INSTANCE_DEVICES);
     }
 
     @Override
     protected void addExtrasForResultOk(Intent intent) {
-        intent.putExtra(GetDeviceReceiver.EXTRA_DEVICE, mDevice);
+        intent.putExtra(GetDevicesReceiver.EXTRA_DEVICES, mList);
     }
 
-    public interface IGetDeviceReceiver {
+    public ArrayList<Device> getDevices() {
+        if (mList == null)
+            new ArrayList<>();
+        return new ArrayList<>(mList);
+    }
+
+    public interface IGetDevicesReceiver {
         void onNoInternet();
 
         void onStartOperation();
 
-        void onSuccess(Device aDevice);
+        void onSuccess(ArrayList<Device> aDevice);
 
         void onError();
 
         void onFinishOperation();
     }
 
-    public static class GetDeviceReceiver extends OperationBroadcastReceiver {
-        static final String EXTRA_DEVICE = "EXTRA_DEVICE";
-        private final IGetDeviceReceiver mCallback;
+    public static class GetDevicesReceiver extends OperationBroadcastReceiver {
+        static final String EXTRA_DEVICES = "EXTRA_DEVICES";
+        private final IGetDevicesReceiver mCallback;
 
-        public GetDeviceReceiver(IGetDeviceReceiver callback) {
+        public GetDevicesReceiver(IGetDevicesReceiver callback) {
             super();
             mCallback = callback;
         }
@@ -122,9 +117,9 @@ public class GetDeviceOperation extends ExampleOperation {
         }
 
         protected void onResultOK(Intent anIntent) {
-            Device device = (Device) anIntent.getSerializableExtra(EXTRA_DEVICE);
-            if (device != null)
-                mCallback.onSuccess(device);
+            ArrayList<Device> list = (ArrayList<Device>) anIntent.getSerializableExtra(EXTRA_DEVICES);
+            if (list != null)
+                mCallback.onSuccess(list);
             else
                 mCallback.onError();
         }

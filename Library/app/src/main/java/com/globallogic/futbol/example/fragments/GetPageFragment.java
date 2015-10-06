@@ -39,6 +39,7 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_get_page, container, false);
+        rootView.findViewById(R.id.fragment_get_page_list_success).setOnClickListener(this);
         rootView.findViewById(R.id.fragment_get_page_success).setOnClickListener(this);
         rootView.findViewById(R.id.fragment_get_page_time_out).setOnClickListener(this);
         return rootView;
@@ -47,6 +48,9 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.fragment_get_page_list_success:
+                mCallback.onExampleGetListSuccess();
+                break;
             case R.id.fragment_get_page_success:
                 mCallback.onExampleGetSuccess();
                 break;
@@ -57,6 +61,8 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
     }
 
     public interface ICallback {
+        void onExampleGetListSuccess();
+
         void onExampleGetSuccess();
 
         void onExampleGetTimeout();

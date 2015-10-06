@@ -33,6 +33,7 @@ dependencies {
     compile project(':futbol')
     //region Material Design
     compile 'com.android.support:support-v13:23.+'
+    compile 'com.android.support:recyclerview-v7:23.+'
     //endregion
     //region Robolectric
     testCompile 'junit:junit:4.12'

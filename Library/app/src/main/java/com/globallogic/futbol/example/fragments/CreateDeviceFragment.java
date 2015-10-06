@@ -116,7 +116,7 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
 
     private void submit() {
         if (checkRequiredField(vName) && checkRequiredField(vResolution)) {
-            mCreateDeviceOperation.performOperation(vName.getText().toString(), vResolution.getText().toString());
+            mCreateDeviceOperation.execute(vName.getText().toString(), vResolution.getText().toString());
         }
     }
 

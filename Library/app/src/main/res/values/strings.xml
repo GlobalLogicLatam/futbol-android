@@ -15,6 +15,7 @@
     <string name="error_malformed_url_exception">Malformed url exception</string>
     <string name="error_io_exception">I/O exception</string>
     <string name="error_other_exception">General exception</string>
+    <string name="get_list_success">Get list of devices</string>
     <string name="get_success">Get device</string>
     <string name="get_time_out">Time out</string>
     <string name="post_submit">Create device</string>

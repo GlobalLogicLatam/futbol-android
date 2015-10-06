@@ -10,6 +10,13 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/fragment_get_page_list_success"
+            style="@style/TextItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/get_list_success"/>
+
+        <TextView
             android:id="@+id/fragment_get_page_success"
             style="@style/TextItem"
             android:layout_width="match_parent"

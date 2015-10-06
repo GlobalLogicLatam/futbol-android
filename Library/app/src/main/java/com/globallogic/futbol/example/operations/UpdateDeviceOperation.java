@@ -31,6 +31,11 @@ public class UpdateDeviceOperation extends ExampleOperation {
         mNotFound = false;
     }
 
+    public void execute(String id, String name, String resolution) {
+        reset();
+        performOperation(id, name, resolution);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String id = (String) arg[0];

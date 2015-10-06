@@ -14,6 +14,10 @@ import com.globallogic.futbol.example.operations.helper.ExampleOperation;
 public class TimeOutOperation extends ExampleOperation {
     private static final String TAG = TimeOutOperation.class.getSimpleName();
 
+    public void execute(){
+        performOperation();
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         StrategyMock strategyMock = new StrategyMock(1.0f);

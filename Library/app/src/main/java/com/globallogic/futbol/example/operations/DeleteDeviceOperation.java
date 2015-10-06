@@ -31,6 +31,11 @@ public class DeleteDeviceOperation extends ExampleOperation {
         mNotFound = false;
     }
 
+    public void execute(String id ){
+        reset();
+        performOperation(id);
+    }
+
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
         String id = (String) arg[0];
