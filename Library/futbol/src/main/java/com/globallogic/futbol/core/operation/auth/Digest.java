@@ -35,14 +35,14 @@ public class Digest {
                     connect = true;
                     Header authenticate = getAuthenticationHeader(headers);
                     if (authenticate != null) {
-                        Builders.Any.B b = Ion.with(aContext).load(getMethod(), getUrl()).setTimeout(Operation.TIMEOUT_MILLISECONDS)
+                        Builders.Any.B b = Ion.with(aContext).load(getMethod(), getUrl()).setTimeout(OperationHttp.TIMEOUT_MILLISECONDS)
                                 .addHeader("platform", "android")
                                 .addHeader(authenticate.getName(), authenticate.getValue());
                         if (!TextUtils.isEmpty(id)) {
                             MyLog.d(TAG, String.format("Device id: %s", id));
                             b = b.addHeader("device", id);
                         }
-                        getResponse(b, callback);
+                        getFilePath(b, callback);
                     } else {
                         MyLog.i(TAG, String.format("Headers: %s", headers.getHeaders().toString()));
                         callback.parseResponse(new HeaderException("Headers error. Strategy: " + toString()), null);

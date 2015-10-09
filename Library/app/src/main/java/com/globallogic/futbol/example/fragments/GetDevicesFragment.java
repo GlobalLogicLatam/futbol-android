@@ -16,8 +16,8 @@ import com.globallogic.futbol.example.activities.GenericExampleActivity;
 import com.globallogic.futbol.example.adapters.DevicesAdapter;
 import com.globallogic.futbol.example.entities.Device;
 import com.globallogic.futbol.example.interfaces.IDevicesAdapterCallbacks;
-import com.globallogic.futbol.example.operations.GetDeviceOperation;
-import com.globallogic.futbol.example.operations.GetDevicesOperation;
+import com.globallogic.futbol.example.operations.GetDeviceOperationHttp;
+import com.globallogic.futbol.example.operations.GetDevicesOperationHttp;
 
 import java.util.ArrayList;
 
@@ -34,11 +34,11 @@ public class GetDevicesFragment extends Fragment {
     private RecyclerView vRecyclerView;
     private DevicesAdapter mMediasAdapter;
 
-    //region GetDevicesOperation
+    //region GetDevicesOperationHttp
     // Defino mi operacion y mi receiver
-    private final GetDevicesOperation mGetDevicesOperation;
-    private final GetDevicesOperation.GetDevicesReceiver mGetDevicesReceiver;
-    private final GetDevicesOperation.IGetDevicesReceiver mGetDevicesCallback = new GetDevicesOperation.IGetDevicesReceiver() {
+    private final GetDevicesOperationHttp mGetDevicesOperation;
+    private final GetDevicesOperationHttp.GetDevicesReceiver mGetDevicesReceiver;
+    private final GetDevicesOperationHttp.IGetDevicesReceiver mGetDevicesCallback = new GetDevicesOperationHttp.IGetDevicesReceiver() {
         @Override
         public void onNoInternet() {
             Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
@@ -74,10 +74,10 @@ public class GetDevicesFragment extends Fragment {
 
     };
     //endregion
-    //region GetDeviceOperation
+    //region GetDeviceOperationHttp
     // Defino mi receiver
-    private final GetDeviceOperation.GetDeviceReceiver mGetDeviceReceiver;
-    private final GetDeviceOperation.IGetDeviceReceiver mGetDeviceCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+    private final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceReceiver;
+    private final GetDeviceOperationHttp.IGetDeviceReceiver mGetDeviceCallback = new GetDeviceOperationHttp.IGetDeviceReceiver() {
         @Override
         public void onNoInternet() {
         }
@@ -107,9 +107,9 @@ public class GetDevicesFragment extends Fragment {
 
     public GetDevicesFragment() {
         String id = "1";
-        mGetDevicesOperation = new GetDevicesOperation(id);
-        mGetDevicesReceiver = new GetDevicesOperation.GetDevicesReceiver(mGetDevicesCallback);
-        mGetDeviceReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceCallback);
+        mGetDevicesOperation = new GetDevicesOperationHttp(id);
+        mGetDevicesReceiver = new GetDevicesOperationHttp.GetDevicesReceiver(mGetDevicesCallback);
+        mGetDeviceReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(mGetDeviceCallback);
     }
 
     public static GetDevicesFragment newInstance() {
@@ -142,7 +142,7 @@ public class GetDevicesFragment extends Fragment {
         vRecyclerView.setAdapter(mMediasAdapter);
 
         mGetDevicesReceiver.register(mGetDevicesOperation);
-        mGetDeviceReceiver.register(GetDeviceOperation.class);
+        mGetDeviceReceiver.register(GetDeviceOperationHttp.class);
 
         return rootView;
     }

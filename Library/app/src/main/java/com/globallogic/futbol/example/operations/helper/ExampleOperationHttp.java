@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.globallogic.futbol.core.operation.Operation;
 import com.globallogic.futbol.core.operation.OperationHelper;
+import com.globallogic.futbol.core.operation.OperationHttp;
 import com.globallogic.futbol.example.R;
 
 import java.util.concurrent.TimeUnit;
@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit;
  * Created by Facundo Mengoni on 6/3/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public abstract class ExampleOperation extends Operation {
+public abstract class ExampleOperationHttp extends OperationHttp {
     public static final String ERROR_RESOURCE = "ERROR_RESOURCE";
     public static final int SECONDS = 3;
     public int errorResource = R.string.no_error;
 
-    public ExampleOperation() {
+    public ExampleOperationHttp() {
         init();
     }
 
-    public ExampleOperation(String id) {
+    public ExampleOperationHttp(String id) {
         super(id);
         init();
     }
@@ -98,4 +98,5 @@ public abstract class ExampleOperation extends Operation {
         super.onRestoreInstanceState(savedInstanceState);
         errorResource = savedInstanceState.getInt(ERROR_RESOURCE);
     }
+
 }

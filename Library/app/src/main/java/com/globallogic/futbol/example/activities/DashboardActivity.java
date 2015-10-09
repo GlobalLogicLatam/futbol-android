@@ -14,6 +14,7 @@ import com.globallogic.futbol.example.fragments.DeletePageFragment;
 import com.globallogic.futbol.example.fragments.GetDeviceFragment;
 import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
+import com.globallogic.futbol.example.fragments.GetFileFragment;
 import com.globallogic.futbol.example.fragments.GetPageFragment;
 import com.globallogic.futbol.example.fragments.PostPageFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
@@ -46,6 +47,14 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
     }
 
     @Override
+    public void onExampleGetFile() {
+        if (isTwoPane)
+            addFragment(GetFileFragment.newInstance(), GetFileFragment.TAG);
+        else
+            startActivity(GetFileFragment.TAG);
+    }
+
+    @Override
     public void onExampleGetListSuccess() {
         if (isTwoPane)
             addFragment(GetDevicesFragment.newInstance(), GetDevicesFragment.TAG);
@@ -59,7 +68,6 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
         else
             startActivity(GetDeviceFragment.TAG);
     }
-
     @Override
     public void onExampleGetTimeout() {
         if (isTwoPane)
@@ -67,7 +75,6 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
         else
             startActivity(GetExampleTimeOutFragment.TAG);
     }
-
     @Override
     public void onExamplePostSingleString() {
         if (isTwoPane)
@@ -75,7 +82,6 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
         else
             startActivity(CreateDeviceFragment.TAG);
     }
-
     @Override
     public void onExampleDeleteItem() {
         if (isTwoPane)
@@ -83,7 +89,6 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
         else
             startActivity(DeleteDeviceFragment.TAG);
     }
-
     @Override
     public void onExamplePutSingleString() {
         if (isTwoPane)

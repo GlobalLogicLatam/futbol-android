@@ -13,17 +13,17 @@ import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.UpdateDeviceOperation;
+import com.globallogic.futbol.example.operations.UpdateDeviceOperationHttp;
 
 /**
  * Created by Ezequiel Sanz on 11/05/15.
  * GlobalLogic | ezequiel.sanz@globallogic.com
  */
-public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDeviceOperation.IUpdateDeviceReceiver, View.OnClickListener {
+public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDeviceOperationHttp.IUpdateDeviceReceiver, View.OnClickListener {
     public static final String TAG = "PutExampleUpdateDeviceFragment";
     // Defino mi operacion y mi receiver
-    private final UpdateDeviceOperation mUpdateDeviceOperation;
-    private final UpdateDeviceOperation.UpdateDeviceReceiver mUpdateDeviceReceiver;
+    private final UpdateDeviceOperationHttp mUpdateDeviceOperation;
+    private final UpdateDeviceOperationHttp.UpdateDeviceReceiver mUpdateDeviceReceiver;
     private EditText vId;
     private EditText vName;
     private EditText vResolution;
@@ -32,8 +32,8 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
 
 
     public PutExampleUpdateDeviceFragment() {
-        mUpdateDeviceOperation = new UpdateDeviceOperation();
-        mUpdateDeviceReceiver = new UpdateDeviceOperation.UpdateDeviceReceiver(this);
+        mUpdateDeviceOperation = new UpdateDeviceOperationHttp();
+        mUpdateDeviceReceiver = new UpdateDeviceOperationHttp.UpdateDeviceReceiver(this);
     }
 
     public static PutExampleUpdateDeviceFragment newInstance() {

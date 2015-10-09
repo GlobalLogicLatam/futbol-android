@@ -2,7 +2,9 @@ package com.globallogic.futbol.core.interfaces;
 
 import android.content.Context;
 
-public interface IOperation {
+import com.globallogic.futbol.core.OperationResponse;
+
+public interface IOperation<T> {
     /**
      * It registers that the operation would be executed but for some reason could not be implemented and that there is someone waiting to do.
      */
@@ -15,11 +17,7 @@ public interface IOperation {
      */
     boolean performOperation(Object... arg);
 
-    /**
-     * This allows you to analyze the http code and save the objects according to code.
-     * Is triggered only if you can connect to the server.
-     */
-    Boolean analyzeResult(int aHttpCode, String result);
+    Boolean analyzeResult(OperationResponse<T> result);
 
     /**
      * This allows you to analyze the exception occurred.

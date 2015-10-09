@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.interfaces.IStrategyCallback;
+import com.globallogic.futbol.core.operation.HttpOperationResponse;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
@@ -13,21 +14,21 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
-public class StrategyMock implements IOperationStrategy {
+public class StrategyHttpMock implements IOperationStrategy {
     public static final String DETAIL_MESSAGE = "Hardcode dummy exception";
-    private static final String TAG = StrategyMock.class.getSimpleName();
-    protected final ArrayList<StrategyMockResponse> responses = new ArrayList<StrategyMockResponse>();
+    private static final String TAG = StrategyHttpMock.class.getSimpleName();
+    protected final ArrayList<StrategyHttpMockResponse> responses = new ArrayList<StrategyHttpMockResponse>();
     protected final ArrayList<Exception> responsesException = new ArrayList<Exception>();
     private final Float mErrorProbability;
     private Random random = new Random();
     private IStrategyCallback mCallback;
 
     /**
-     * A StrategyMock allows to simulate any response that the server can return.
+     * A StrategyHttpMock allows to simulate any response that the server can return.
      *
-     * @param errorProbability Determines the probability that the error occurs. If it is less than or equal to 0 returns a {@link StrategyMockResponse} (or an exception if there is no added replies). If it is greater or equal to 1 always returns an exception
+     * @param errorProbability Determines the probability that the error occurs. If it is less than or equal to 0 returns a {@link StrategyHttpMockResponse} (or an exception if there is no added replies). If it is greater or equal to 1 always returns an exception
      */
-    public StrategyMock(float errorProbability) {
+    public StrategyHttpMock(float errorProbability) {
         this.mErrorProbability = errorProbability;
     }
 
@@ -47,14 +48,14 @@ public class StrategyMock implements IOperationStrategy {
                     // Ejecuto un error
                     Exception mockException = getMockException();
                     if (mockException != null)
-                        mCallback.parseResponse(mockException, 0, null);
+                        mCallback.parseResponse(mockException, new HttpOperationResponse(0, null));
                     else
                         onNotResponseAdded();
                 } else {
                     // Retorno alguna respuesta dummy
-                    StrategyMockResponse mockResponse = getMockResponse();
+                    StrategyHttpMockResponse mockResponse = getMockResponse();
                     if (mockResponse != null)
-                        mCallback.parseResponse(null, mockResponse.getHttpCode(), mockResponse.getResponse());
+                        mCallback.parseResponse(null, new HttpOperationResponse(mockResponse.getHttpCode(), mockResponse.getResponse()));
                     else
                         onNotResponseAdded();
                 }
@@ -63,10 +64,10 @@ public class StrategyMock implements IOperationStrategy {
     }
 
     private void onNotResponseAdded() {
-        mCallback.parseResponse(new Exception(DETAIL_MESSAGE), 0, null);
+        mCallback.parseResponse(new Exception(DETAIL_MESSAGE), new HttpOperationResponse(0, null));
     }
 
-    private StrategyMockResponse getMockResponse() {
+    private StrategyHttpMockResponse getMockResponse() {
         if (responses.size() > 0) {
             return responses.get(random.nextInt(responses.size()));
         }
@@ -83,9 +84,9 @@ public class StrategyMock implements IOperationStrategy {
     /**
      * Adds an expected response
      *
-     * @see StrategyMockResponse
+     * @see StrategyHttpMockResponse
      */
-    public StrategyMock add(StrategyMockResponse mockResponse) {
+    public StrategyHttpMock add(StrategyHttpMockResponse mockResponse) {
         responses.add(mockResponse);
         return this;
     }
@@ -93,37 +94,37 @@ public class StrategyMock implements IOperationStrategy {
     /**
      * Adds an expected exception
      */
-    public StrategyMock add(Exception exception) {
+    public StrategyHttpMock add(Exception exception) {
         responsesException.add(exception);
         return this;
     }
 
-    public StrategyMock addJsonSyntaxException() {
+    public StrategyHttpMock addJsonSyntaxException() {
         responsesException.add(new JsonSyntaxException(DETAIL_MESSAGE));
         return this;
     }
 
-    public StrategyMock addSocketException() {
+    public StrategyHttpMock addSocketException() {
         responsesException.add(new SocketException(DETAIL_MESSAGE));
         return this;
     }
 
-    public StrategyMock addMalformedURLException() {
+    public StrategyHttpMock addMalformedURLException() {
         responsesException.add(new MalformedURLException(DETAIL_MESSAGE));
         return this;
     }
 
-    public StrategyMock addTimeoutException() {
+    public StrategyHttpMock addTimeoutException() {
         responsesException.add(new TimeoutException(DETAIL_MESSAGE));
         return this;
     }
 
-    public StrategyMock addIOException() {
+    public StrategyHttpMock addIOException() {
         responsesException.add(new IOException(DETAIL_MESSAGE));
         return this;
     }
 
-    public StrategyMock addException() {
+    public StrategyHttpMock addException() {
         responsesException.add(new Exception(DETAIL_MESSAGE));
         return this;
     }
@@ -131,9 +132,9 @@ public class StrategyMock implements IOperationStrategy {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof StrategyMock)) return false;
+        if (!(o instanceof StrategyHttpMock)) return false;
 
-        StrategyMock that = (StrategyMock) o;
+        StrategyHttpMock that = (StrategyHttpMock) o;
 
         return responses.equals(that.responses);
     }

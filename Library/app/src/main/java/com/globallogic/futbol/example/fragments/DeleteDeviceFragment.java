@@ -13,25 +13,24 @@ import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.DeleteDeviceOperation;
+import com.globallogic.futbol.example.operations.DeleteDeviceOperationHttp;
 
 /**
  * Created by Ezequiel Sanz on 11/05/15.
  * GlobalLogic | ezequiel.sanz@globallogic.com
  */
-public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperation.IDeleteDeviceReceiver, View.OnClickListener {
+public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperationHttp.IDeleteDeviceReceiver, View.OnClickListener {
     public static final String TAG = "DeleteDeviceFragment";
     // Defino mi operacion y mi receiver
-    private final DeleteDeviceOperation mDeleteDeviceOperation;
-    private final DeleteDeviceOperation.DeleteDeviceReceiver mDeleteDeviceReceiver;
+    private final DeleteDeviceOperationHttp mDeleteDeviceOperation;
+    private final DeleteDeviceOperationHttp.DeleteDeviceReceiver mDeleteDeviceReceiver;
     private EditText vId;
     private Button vSubmit;
     private TextView vOperationResult;
 
-
     public DeleteDeviceFragment() {
-        mDeleteDeviceOperation = new DeleteDeviceOperation();
-        mDeleteDeviceReceiver = new DeleteDeviceOperation.DeleteDeviceReceiver(this);
+        mDeleteDeviceOperation = new DeleteDeviceOperationHttp();
+        mDeleteDeviceReceiver = new DeleteDeviceOperationHttp.DeleteDeviceReceiver(this);
     }
 
     public static DeleteDeviceFragment newInstance() {

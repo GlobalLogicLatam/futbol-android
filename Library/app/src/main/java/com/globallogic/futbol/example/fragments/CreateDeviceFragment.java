@@ -13,17 +13,17 @@ import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.CreateDeviceOperation;
+import com.globallogic.futbol.example.operations.CreateDeviceOperationHttp;
 
 /**
  * Created by Facundo Mengoni on 8/6/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class CreateDeviceFragment extends Fragment implements CreateDeviceOperation.ICreateDeviceReceiver, View.OnClickListener {
+public class CreateDeviceFragment extends Fragment implements CreateDeviceOperationHttp.ICreateDeviceReceiver, View.OnClickListener {
     public static final String TAG = "CreateDeviceFragment";
     // Defino mi operacion y mi receiver
-    private final CreateDeviceOperation mCreateDeviceOperation;
-    private final CreateDeviceOperation.CreateDeviceReceiver mCreateDeviceReceiver;
+    private final CreateDeviceOperationHttp mCreateDeviceOperation;
+    private final CreateDeviceOperationHttp.CreateDeviceReceiver mCreateDeviceReceiver;
     private EditText vName;
     private EditText vResolution;
     private Button vSubmit;
@@ -31,8 +31,8 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
 
 
     public CreateDeviceFragment() {
-        mCreateDeviceOperation = new CreateDeviceOperation();
-        mCreateDeviceReceiver = new CreateDeviceOperation.CreateDeviceReceiver(this);
+        mCreateDeviceOperation = new CreateDeviceOperationHttp();
+        mCreateDeviceReceiver = new CreateDeviceOperationHttp.CreateDeviceReceiver(this);
     }
 
     public static CreateDeviceFragment newInstance() {

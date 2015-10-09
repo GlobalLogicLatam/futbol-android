@@ -2,17 +2,18 @@ package com.globallogic.futbol.example.operations;
 
 import android.content.Intent;
 
+import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.example.operations.helper.ExampleOperation;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMock;
+import com.globallogic.futbol.example.operations.helper.ExampleOperationHttp;
 
 /**
  * Created by Facundo Mengoni on 6/3/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class TimeOutOperation extends ExampleOperation {
-    private static final String TAG = TimeOutOperation.class.getSimpleName();
+public class TimeOutOperationHttp extends ExampleOperationHttp {
+    private static final String TAG = TimeOutOperationHttp.class.getSimpleName();
 
     public void execute(){
         performOperation();
@@ -20,13 +21,13 @@ public class TimeOutOperation extends ExampleOperation {
 
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
-        StrategyMock strategyMock = new StrategyMock(1.0f);
-        strategyMock.addTimeoutException();
-        return strategyMock;
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(1.0f);
+        strategyHttpMock.addTimeoutException();
+        return strategyHttpMock;
     }
 
     @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
+    public Boolean analyzeResult(OperationResponse<String> response) {
         return true;
     }
 

@@ -8,9 +8,9 @@ import android.text.TextUtils;
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.operation.OperationHelper;
 import com.globallogic.futbol.core.operation.OperationStatus;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMockResponse;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.GetDeviceOperation;
+import com.globallogic.futbol.example.operations.GetDeviceOperationHttp;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,8 +77,8 @@ public class GetDeviceOperationTest {
     public void getDeviceTimeout() {
         final Integer id = 1;
         //region Setup
-        final GetDeviceOperation mGetDeviceTimeOutOperation = new GetDeviceOperation(id);
-        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceTimeOutCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+        final GetDeviceOperationHttp mGetDeviceTimeOutOperation = new GetDeviceOperationHttp(id);
+        final GetDeviceOperationHttp.IGetDeviceReceiver mGetDeviceTimeOutCallback = new GetDeviceOperationHttp.IGetDeviceReceiver() {
             @Override
             public void onSuccess(Device aDevice) {
                 assertTrue("This should never happen", false);
@@ -108,7 +108,7 @@ public class GetDeviceOperationTest {
             public void onStartOperation() {
             }
         };
-        final GetDeviceOperation.GetDeviceReceiver mGetDeviceTimeOutReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceTimeOutCallback);
+        final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceTimeOutReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(mGetDeviceTimeOutCallback);
         //endregion
 
         //region Register
@@ -125,8 +125,8 @@ public class GetDeviceOperationTest {
     public void getDeviceSuccess() {
         final Integer id = 2;
         //region Setup
-        final GetDeviceOperation mGetDeviceSuccessOperation = new GetDeviceOperation(id);
-        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceSuccessCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+        final GetDeviceOperationHttp mGetDeviceSuccessOperation = new GetDeviceOperationHttp(id);
+        final GetDeviceOperationHttp.IGetDeviceReceiver mGetDeviceSuccessCallback = new GetDeviceOperationHttp.IGetDeviceReceiver() {
             @Override
             public void onSuccess(Device aDevice) {
                 assertTrue(String.format("The id was \"%s\" and was expected \"%s\"",
@@ -163,7 +163,7 @@ public class GetDeviceOperationTest {
             public void onStartOperation() {
             }
         };
-        final GetDeviceOperation.GetDeviceReceiver mGetDeviceSuccessReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceSuccessCallback);
+        final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceSuccessReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(mGetDeviceSuccessCallback);
         //endregion
 
         //region Register
@@ -173,7 +173,7 @@ public class GetDeviceOperationTest {
         //region Test
         try {
             String json = String.format(OperationHelper.assetsReader(getContext(), "json/test/GetDeviceOperationTest.json"), id);
-            mGetDeviceSuccessOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
+            mGetDeviceSuccessOperation.testResponse(new StrategyHttpMockResponse(HttpURLConnection.HTTP_OK, json));
             assertTrue(mGetDeviceSuccessOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
         } catch (IOException e) {
             assertTrue(e.getMessage(), false);
@@ -186,8 +186,8 @@ public class GetDeviceOperationTest {
         final Integer id = 3;
         //region Setup
         setConnectionAs(NetworkInfo.DetailedState.DISCONNECTED, ConnectivityManager.TYPE_WIFI, 0, false);
-        final GetDeviceOperation mGetDeviceNoInternetOperation = new GetDeviceOperation(id);
-        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceNoInternetCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+        final GetDeviceOperationHttp mGetDeviceNoInternetOperation = new GetDeviceOperationHttp(id);
+        final GetDeviceOperationHttp.IGetDeviceReceiver mGetDeviceNoInternetCallback = new GetDeviceOperationHttp.IGetDeviceReceiver() {
             @Override
             public void onSuccess(Device aDevice) {
                 assertTrue("This should never happen", false);
@@ -213,7 +213,7 @@ public class GetDeviceOperationTest {
             public void onStartOperation() {
             }
         };
-        final GetDeviceOperation.GetDeviceReceiver mGetDeviceNoInternetReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceNoInternetCallback);
+        final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceNoInternetReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(mGetDeviceNoInternetCallback);
         //endregion
 
         //region Register
@@ -223,7 +223,7 @@ public class GetDeviceOperationTest {
         //region Test
         try {
             String json = String.format(OperationHelper.assetsReader(getContext(), "json/test/GetDeviceOperationTest.json"), id);
-            mGetDeviceNoInternetOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_OK, json));
+            mGetDeviceNoInternetOperation.testResponse(new StrategyHttpMockResponse(HttpURLConnection.HTTP_OK, json));
             assertTrue(mGetDeviceNoInternetOperation.getStatus() == OperationStatus.UNKNOWN || mGetDeviceNoInternetOperation.getStatus() == OperationStatus.READY_TO_EXECUTE || mGetDeviceNoInternetOperation.getStatus() == OperationStatus.WAITING_EXECUTION);
         } catch (IOException e) {
             assertTrue(e.getMessage(), false);
@@ -235,8 +235,8 @@ public class GetDeviceOperationTest {
     public void getDeviceUnexpectedResponse() {
         final Integer id = 4;
         //region Setup
-        final GetDeviceOperation mGetDeviceUnexpectedResponseOperation = new GetDeviceOperation(id);
-        final GetDeviceOperation.IGetDeviceReceiver mGetDeviceUnexpectedResponseCallback = new GetDeviceOperation.IGetDeviceReceiver() {
+        final GetDeviceOperationHttp mGetDeviceUnexpectedResponseOperation = new GetDeviceOperationHttp(id);
+        final GetDeviceOperationHttp.IGetDeviceReceiver mGetDeviceUnexpectedResponseCallback = new GetDeviceOperationHttp.IGetDeviceReceiver() {
             @Override
             public void onSuccess(Device aDevice) {
                 assertTrue("This should never happen", false);
@@ -266,7 +266,7 @@ public class GetDeviceOperationTest {
             public void onStartOperation() {
             }
         };
-        final GetDeviceOperation.GetDeviceReceiver mGetDeviceUnexpectedResponseReceiver = new GetDeviceOperation.GetDeviceReceiver(mGetDeviceUnexpectedResponseCallback);
+        final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceUnexpectedResponseReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(mGetDeviceUnexpectedResponseCallback);
         //endregion
 
         //region Register
@@ -274,7 +274,7 @@ public class GetDeviceOperationTest {
         //endregion
 
         //region Test
-        mGetDeviceUnexpectedResponseOperation.testResponse(new StrategyMockResponse(HttpURLConnection.HTTP_NO_CONTENT, ""));
+        mGetDeviceUnexpectedResponseOperation.testResponse(new StrategyHttpMockResponse(HttpURLConnection.HTTP_NO_CONTENT, ""));
         assertTrue(mGetDeviceUnexpectedResponseOperation.getStatus() == OperationStatus.FINISHED_EXECUTION);
         //endregion
     }

@@ -9,23 +9,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.operations.TimeOutOperation;
+import com.globallogic.futbol.example.operations.TimeOutOperationHttp;
 
 /**
  * Created by Ezequiel Sanz on 11/05/15.
  * GlobalLogic | ezequiel.sanz@globallogic.com
  */
-public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperation.ITimeOutReceiver {
+public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperationHttp.ITimeOutReceiver {
     public static final String TAG = "GetExampleTimeOutFragment";
     // Defino mi operacion y mi receiver
-    private final TimeOutOperation mTimeOutOperation;
-    private final TimeOutOperation.TimeOutReceiver mTimeOutReceiver;
+    private final TimeOutOperationHttp mTimeOutOperation;
+    private final TimeOutOperationHttp.TimeOutReceiver mTimeOutReceiver;
     private TextView vOperationStatus;
     private TextView vOperationResult;
 
     public GetExampleTimeOutFragment() {
-        mTimeOutOperation = new TimeOutOperation();
-        mTimeOutReceiver = new TimeOutOperation.TimeOutReceiver(this);
+        mTimeOutOperation = new TimeOutOperationHttp();
+        mTimeOutReceiver = new TimeOutOperationHttp.TimeOutReceiver(this);
     }
 
     public static GetExampleTimeOutFragment newInstance() {

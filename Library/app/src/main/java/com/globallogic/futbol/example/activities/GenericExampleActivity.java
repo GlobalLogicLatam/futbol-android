@@ -12,6 +12,7 @@ import com.globallogic.futbol.example.fragments.DeleteDeviceFragment;
 import com.globallogic.futbol.example.fragments.GetDeviceFragment;
 import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
+import com.globallogic.futbol.example.fragments.GetFileFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 
 public class GenericExampleActivity extends Activity {
@@ -50,6 +51,9 @@ public class GenericExampleActivity extends Activity {
                     break;
                 case PutExampleUpdateDeviceFragment.TAG:
                     fragment = PutExampleUpdateDeviceFragment.newInstance();
+                    break;
+                case GetFileFragment.TAG:
+                    fragment = GetFileFragment.newInstance();
                     break;
             }
             if (fragment != null)

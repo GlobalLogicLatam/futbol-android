@@ -8,14 +8,14 @@ import java.io.Serializable;
  * @author Facundo Mengoni | GlobalLogic
  * @author facundo.mengoni@globallogic.com
  */
-public class StrategyMockResponse implements Serializable {
+public class StrategyHttpMockResponse implements Serializable {
     private Integer httpCode;
     private String response;
 
-    public StrategyMockResponse() {
+    public StrategyHttpMockResponse() {
     }
 
-    public StrategyMockResponse(int httpCode, String response) {
+    public StrategyHttpMockResponse(int httpCode, String response) {
         this.httpCode = httpCode;
         this.response = response;
     }
@@ -38,7 +38,7 @@ public class StrategyMockResponse implements Serializable {
 
     @Override
     public String toString() {
-        return "StrategyMockResponse{" +
+        return "StrategyHttpMockResponse{" +
                 "httpCode=" + httpCode +
                 ", response='" + response + '\'' +
                 '}';

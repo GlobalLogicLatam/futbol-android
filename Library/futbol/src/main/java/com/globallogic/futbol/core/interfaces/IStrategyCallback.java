@@ -1,12 +1,12 @@
 package com.globallogic.futbol.core.interfaces;
 
-public interface IStrategyCallback {
+import com.globallogic.futbol.core.OperationResponse;
+
+public interface IStrategyCallback<T> {
     /**
      * Analysis of the response returned by the server
      *
      * @param aException the exception thrown because of some error
-     * @param aHttpCode  the http response code
-     * @param aString    the string of the response
      */
-    void parseResponse(Exception aException, int aHttpCode, String aString);
+    void parseResponse(Exception aException, OperationResponse<T> response);
 }

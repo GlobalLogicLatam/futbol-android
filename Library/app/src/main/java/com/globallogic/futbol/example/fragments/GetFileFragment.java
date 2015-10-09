@@ -1,6 +1,8 @@
 package com.globallogic.futbol.example.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,29 +11,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.GetDeviceOperationHttp;
+import com.globallogic.futbol.example.operations.GetFileOperation;
 
-/**
- * Created by Ezequiel Sanz on 11/05/15.
- * GlobalLogic | ezequiel.sanz@globallogic.com
- */
-public class GetDeviceFragment extends Fragment implements GetDeviceOperationHttp.IGetDeviceReceiver {
-    public static final String TAG = "GetDeviceFragment";
-    // Defino mi operacion y mi receiver
-    private final GetDeviceOperationHttp mGetDeviceOperation;
-    private final GetDeviceOperationHttp.GetDeviceReceiver mGetDeviceReceiver;
+import java.io.File;
+
+public class GetFileFragment extends Fragment implements GetFileOperation.IGetFileReceiver {
+    public static final String TAG = "GetFileFragment";
+
+    private final GetFileOperation mGetFileOperation;
+    private final GetFileOperation.GetFileReceiver mGetFileReceiver;
     private TextView vOperationStatus;
     private TextView vOperationResult;
 
-    public GetDeviceFragment() {
-        Integer id = 1;
-        mGetDeviceOperation = new GetDeviceOperationHttp(id);
-        mGetDeviceReceiver = new GetDeviceOperationHttp.GetDeviceReceiver(this);
+    public GetFileFragment() {
+        mGetFileOperation = new GetFileOperation();
+        mGetFileReceiver = new GetFileOperation.GetFileReceiver(this);
     }
 
-    public static GetDeviceFragment newInstance() {
-        return new GetDeviceFragment();
+    public static GetFileFragment newInstance() {
+        return new GetFileFragment();
     }
 
     @Override
@@ -45,13 +43,16 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
     }
 
     @Override
-    public void onSuccess(Device aDevice) {
-        vOperationResult.setText(aDevice.toString());
+    public void onSuccess(File aFile) {
+        Intent i = new Intent();
+        i.setAction(Intent.ACTION_VIEW);
+        i.setDataAndType(Uri.fromFile(new File(aFile.getAbsolutePath())), "image/*");
+        startActivity(i);
     }
 
     @Override
     public void onError() {
-        vOperationResult.setText(mGetDeviceOperation.getError(getActivity()));
+        vOperationResult.setText(mGetFileOperation.getError(getActivity()));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGetDeviceOperation.onCreate(savedInstanceState);
+        mGetFileOperation.onCreate(savedInstanceState);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
         vOperationStatus = (TextView) rootView.findViewById(R.id.operation_status);
         vOperationResult = (TextView) rootView.findViewById(R.id.operation_result);
 
-        mGetDeviceReceiver.register(mGetDeviceOperation);
+        mGetFileReceiver.register(mGetFileOperation);
 
         return rootView;
     }
@@ -80,11 +81,11 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mGetDeviceOperation.execute();
+        mGetFileOperation.execute();
     }
 
     private void updateOperationStatus() {
-        switch (mGetDeviceOperation.getStatus()) {
+        switch (mGetFileOperation.getStatus()) {
             case READY_TO_EXECUTE:
                 vOperationStatus.setText("Ready to execute");
                 break;
@@ -108,7 +109,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //Guardo los datos necesario de la operacion
-        mGetDeviceOperation.onSaveInstanceState(outState);
+        mGetFileOperation.onSaveInstanceState(outState);
     }
 
 
@@ -116,6 +117,6 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperationHtt
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mGetDeviceReceiver.unRegister();
+        mGetFileReceiver.unRegister();
     }
 }

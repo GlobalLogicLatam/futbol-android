@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.globallogic.futbol.core.OperationApp;
+import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMock;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMockResponse;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.helper.ExampleOperation;
+import com.globallogic.futbol.example.operations.helper.ExampleOperationHttp;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,15 +20,15 @@ import java.net.HttpURLConnection;
  * Created by Facundo Mengoni on 8/6/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class GetDeviceOperation extends ExampleOperation {
-    private static final String TAG = GetDeviceOperation.class.getSimpleName();
+public class GetDeviceOperationHttp extends ExampleOperationHttp {
+    private static final String TAG = GetDeviceOperationHttp.class.getSimpleName();
     private static final String SAVE_INSTANCE_DEVICE = "SAVE_INSTANCE_DEVICE";
 
     private final Integer mId;
 
     private Device mDevice;
 
-    public GetDeviceOperation(Integer anId) {
+    public GetDeviceOperationHttp(Integer anId) {
         super(anId.toString());
         mId = anId;
     }
@@ -44,7 +45,7 @@ public class GetDeviceOperation extends ExampleOperation {
 
     @Override
     protected IOperationStrategy getStrategy(Object... arg) {
-        StrategyMock strategyMock = new StrategyMock(0f);
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(0f);
         try {
             String name = "";
             switch (mId) {
@@ -55,17 +56,17 @@ public class GetDeviceOperation extends ExampleOperation {
                     name = "Moto G";
                     break;
             }
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/GetDeviceOperation_1.json"), mId, name)));
+            strategyHttpMock.add(new StrategyHttpMockResponse(HttpURLConnection.HTTP_OK, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/GetDeviceOperation_1.json"), mId, name)));
         } catch (IOException e) {
         }
-        return strategyMock;
+        return strategyHttpMock;
     }
 
     @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
-        switch (aHttpCode) {
+    public Boolean analyzeResult(OperationResponse<String> response) {
+        switch (response.getResultCode()) {
             case HttpURLConnection.HTTP_OK:
-                this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
+                this.mDevice = OperationHelper.getModelObject(response.getResult(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
                 return true;
         }
         return false;

@@ -30,6 +30,13 @@
             android:layout_height="wrap_content"
             android:text="@string/get_time_out"/>
 
+        <TextView
+            android:id="@+id/fragment_get_page_file"
+            style="@style/TextItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/get_file" />
+
     </LinearLayout>
 </ScrollView>
 

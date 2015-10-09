@@ -3,13 +3,14 @@ package com.globallogic.futbol.example.operations;
 import android.content.Intent;
 
 import com.globallogic.futbol.core.OperationApp;
+import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
 import com.globallogic.futbol.core.operation.OperationHelper;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMock;
+import com.globallogic.futbol.core.operation.strategies.StrategyHttpMockResponse;
 import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.helper.ExampleOperation;
+import com.globallogic.futbol.example.operations.helper.ExampleOperationHttp;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -18,8 +19,8 @@ import java.net.HttpURLConnection;
  * Created by Facundo Mengoni on 8/6/2015.
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
-public class CreateDeviceOperation extends ExampleOperation {
-    private static final String TAG = CreateDeviceOperation.class.getSimpleName();
+public class CreateDeviceOperationHttp extends ExampleOperationHttp {
+    private static final String TAG = CreateDeviceOperationHttp.class.getSimpleName();
 
     private Device mDevice;
 
@@ -39,19 +40,19 @@ public class CreateDeviceOperation extends ExampleOperation {
         String name = (String) arg[0];
         String resolution = (String) arg[1];
 
-        StrategyMock strategyMock = new StrategyMock(0f);
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(0f);
         try {
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_CREATED, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/CreateDeviceOperation_1.json"), name, resolution)));
+            strategyHttpMock.add(new StrategyHttpMockResponse(HttpURLConnection.HTTP_CREATED, String.format(OperationHelper.assetsReader(OperationApp.getInstance(), "json/CreateDeviceOperation_1.json"), name, resolution)));
         } catch (IOException e) {
         }
-        return strategyMock;
+        return strategyHttpMock;
     }
 
     @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
-        switch (aHttpCode) {
+    public Boolean analyzeResult(OperationResponse<String> response) {
+        switch (response.getResultCode()) {
             case HttpURLConnection.HTTP_CREATED:
-                this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
+                this.mDevice = OperationHelper.getModelObject(response.getResult(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
                 return true;
         }
         return false;
