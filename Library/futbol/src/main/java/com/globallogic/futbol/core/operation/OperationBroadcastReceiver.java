@@ -20,34 +20,34 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
         return String.format(ACTION_FORMAT, aClazz, anAction, anId);
     }
 
-    public static String getActionForNoInternet(OperationHttp aOperationHttp) {
-        return getAction(aOperationHttp.getClass().getSimpleName(),
+    public static String getActionForNoInternet(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.NO_INTERNET.name,
-                aOperationHttp.getId());
+                aOperation.getId());
     }
 
-    public static String getActionForStart(OperationHttp aOperationHttp) {
-        return getAction(aOperationHttp.getClass().getSimpleName(),
+    public static String getActionForStart(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.START.name,
-                aOperationHttp.getId());
+                aOperation.getId());
     }
 
-    public static String getActionForOk(OperationHttp aOperationHttp) {
-        return getAction(aOperationHttp.getClass().getSimpleName(),
+    public static String getActionForOk(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.OK.name,
-                aOperationHttp.getId());
+                aOperation.getId());
     }
 
-    public static String getActionForError(OperationHttp aOperationHttp) {
-        return getAction(aOperationHttp.getClass().getSimpleName(),
+    public static String getActionForError(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.ERROR.name,
-                aOperationHttp.getId());
+                aOperation.getId());
     }
 
-    public static String getActionForFinish(OperationHttp aOperationHttp) {
-        return getAction(aOperationHttp.getClass().getSimpleName(),
+    public static String getActionForFinish(Operation aOperation) {
+        return getAction(aOperation.getClass().getSimpleName(),
                 OperationResult.FINISH.name,
-                aOperationHttp.getId());
+                aOperation.getId());
     }
 
     public static String getActionForNoInternet(Class aClass) {
@@ -145,10 +145,10 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     /**
      * Register the receiver to listen events of the operation
      *
-     * @param aOperationHttp the operation to listen
+     * @param aOperation the operation to listen
      */
-    public void register(OperationHttp aOperationHttp) {
-        register(aOperationHttp.getClass(), aOperationHttp.getId());
+    public void register(Operation aOperation) {
+        register(aOperation.getClass(), aOperation.getId());
     }
 
     public void register(OperationFile aOperationFile) {
