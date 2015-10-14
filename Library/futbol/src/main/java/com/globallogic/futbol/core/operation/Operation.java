@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public abstract class Operation<T> implements Serializable, IOperation<T>, IStrategyCallback<T> {
+public abstract class Operation<Z, T> implements Serializable, IOperation<Z, T>, IStrategyCallback<Z, T> {
 
     //region Constants
     private static final String TAG = OperationHttp.class.getSimpleName();

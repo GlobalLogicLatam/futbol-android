@@ -9,8 +9,8 @@ import java.io.File;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public class FileOperationResponse extends OperationResponse<File> {
-    public FileOperationResponse(int aHttpCode, File aFile) {
+public class FileOperationResponse extends OperationResponse<Integer, File> {
+    public FileOperationResponse(Integer aHttpCode, File aFile) {
         super(aHttpCode, aFile);
     }
 }

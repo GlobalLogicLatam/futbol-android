@@ -43,6 +43,7 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
         rootView.findViewById(R.id.fragment_get_page_success).setOnClickListener(this);
         rootView.findViewById(R.id.fragment_get_page_time_out).setOnClickListener(this);
         rootView.findViewById(R.id.fragment_get_page_file).setOnClickListener(this);
+        rootView.findViewById(R.id.fragment_select_page_devices).setOnClickListener(this);
         return rootView;
     }
 
@@ -61,6 +62,9 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
             case R.id.fragment_get_page_file:
                 mCallback.onExampleGetFile();
                 break;
+            case R.id.fragment_select_page_devices:
+                mCallback.onExampleSelectDevices();
+                break;
         }
     }
 
@@ -72,5 +76,7 @@ public class GetPageFragment extends Fragment implements View.OnClickListener {
         void onExampleGetTimeout();
 
         void onExampleGetFile();
+
+        void onExampleSelectDevices();
     }
 }

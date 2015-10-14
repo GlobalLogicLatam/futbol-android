@@ -21,7 +21,7 @@ import java.util.logging.Level;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public abstract class OperationFile extends Operation<File> {
+public abstract class OperationFile extends Operation<Integer, File> {
 
     private String targetPath;
 
@@ -146,7 +146,7 @@ public abstract class OperationFile extends Operation<File> {
      */
 
     @Override
-    public void parseResponse(final Exception aException, final OperationResponse<File> aResponse) {
+    public void parseResponse(final Exception aException, final OperationResponse<Integer, File> aResponse) {
         if (aException != null)
             mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
         // Parse and analyze

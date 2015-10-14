@@ -9,7 +9,7 @@ import com.globallogic.futbol.core.operation.strategies.StrategyHttpMockResponse
 
 import java.util.logging.Level;
 
-public abstract class OperationHttp extends Operation<String> {
+public abstract class OperationHttp extends Operation<Integer, String> {
 
     //region Constructors
 
@@ -84,7 +84,7 @@ public abstract class OperationHttp extends Operation<String> {
      */
 
     @Override
-    public void parseResponse(final Exception aException, final OperationResponse<String> aResponse) {
+    public void parseResponse(final Exception aException, final OperationResponse<Integer, String> aResponse) {
         if (aException != null)
             mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
         if (TextUtils.isEmpty(aResponse.getResult()) || !(aResponse.getResult().startsWith("{") || aResponse.getResult().startsWith("[")))

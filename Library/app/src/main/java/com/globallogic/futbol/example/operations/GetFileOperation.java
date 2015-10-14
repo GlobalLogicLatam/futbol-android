@@ -46,7 +46,7 @@ public class GetFileOperation extends ExampleOperationFile {
     }
 
     @Override
-    public Boolean analyzeResult(OperationResponse<File> response) {
+    public Boolean analyzeResult(OperationResponse<Integer, File> response) {
         switch (response.getResultCode()) {
             case HttpURLConnection.HTTP_OK:
                 this.mFile = response.getResult();

@@ -19,6 +19,7 @@ import com.globallogic.futbol.example.fragments.GetPageFragment;
 import com.globallogic.futbol.example.fragments.PostPageFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 import com.globallogic.futbol.example.fragments.PutPageFragment;
+import com.globallogic.futbol.example.fragments.SelectDevicesFragment;
 
 import java.util.Locale;
 
@@ -44,6 +45,14 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
 
     private void startActivity(String tag) {
         startActivity(GenericExampleActivity.generateIntent(this, tag));
+    }
+
+    @Override
+    public void onExampleSelectDevices() {
+        if (isTwoPane)
+            addFragment(SelectDevicesFragment.newInstance(), SelectDevicesFragment.TAG);
+        else
+            startActivity(SelectDevicesFragment.TAG);
     }
 
     @Override

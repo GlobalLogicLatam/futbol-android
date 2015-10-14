@@ -37,6 +37,13 @@
             android:layout_height="wrap_content"
             android:text="@string/get_file" />
 
+        <TextView
+            android:id="@+id/fragment_select_page_devices"
+            style="@style/TextItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_devices" />
+
     </LinearLayout>
 </ScrollView>
 

@@ -7,11 +7,11 @@ import java.io.Serializable;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public class OperationResponse<T> implements Serializable {
+public class OperationResponse<Z, T> implements Serializable {
     private T result;
-    private int resultCode;
+    private Z resultCode;
 
-    public OperationResponse(int aCode, T aResponse) {
+    public OperationResponse(Z aCode, T aResponse) {
         resultCode = aCode;
         result = aResponse;
     }
@@ -24,11 +24,11 @@ public class OperationResponse<T> implements Serializable {
         this.result = result;
     }
 
-    public int getResultCode() {
+    public Z getResultCode() {
         return resultCode;
     }
 
-    public void setResultCode(int resultCode) {
+    public void setResultCode(Z resultCode) {
         this.resultCode = resultCode;
     }
 }

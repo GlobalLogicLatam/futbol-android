@@ -7,8 +7,8 @@ import com.globallogic.futbol.core.OperationResponse;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public class HttpOperationResponse extends OperationResponse<String> {
-    public HttpOperationResponse(int aHttpCode, String aString) {
+public class HttpOperationResponse extends OperationResponse<Integer, String> {
+    public HttpOperationResponse(Integer aHttpCode, String aString) {
         super(aHttpCode, aString);
     }
 }

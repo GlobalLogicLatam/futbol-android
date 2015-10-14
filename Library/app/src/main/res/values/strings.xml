@@ -29,4 +29,5 @@
     <string name="required">Required</string>
     <string name="not_found">Not found</string>
     <string name="get_file">Get file</string>
+    <string name="select_devices">Select devoces</string>
 </resources>

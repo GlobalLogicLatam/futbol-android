@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.globallogic.futbol.core.OperationResponse;
 
-public interface IOperation<T> {
+public interface IOperation<Z, T> {
     /**
      * It registers that the operation would be executed but for some reason could not be implemented and that there is someone waiting to do.
      */
@@ -17,7 +17,7 @@ public interface IOperation<T> {
      */
     boolean performOperation(Object... arg);
 
-    Boolean analyzeResult(OperationResponse<T> result);
+    Boolean analyzeResult(OperationResponse<Z, T> result);
 
     /**
      * This allows you to analyze the exception occurred.

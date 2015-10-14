@@ -63,7 +63,7 @@ public class GetDeviceOperationHttp extends ExampleOperationHttp {
     }
 
     @Override
-    public Boolean analyzeResult(OperationResponse<String> response) {
+    public Boolean analyzeResult(OperationResponse<Integer, String> response) {
         switch (response.getResultCode()) {
             case HttpURLConnection.HTTP_OK:
                 this.mDevice = OperationHelper.getModelObject(response.getResult(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);

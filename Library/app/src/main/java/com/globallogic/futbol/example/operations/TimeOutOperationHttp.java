@@ -27,7 +27,7 @@ public class TimeOutOperationHttp extends ExampleOperationHttp {
     }
 
     @Override
-    public Boolean analyzeResult(OperationResponse<String> response) {
+    public Boolean analyzeResult(OperationResponse<Integer, String> response) {
         return true;
     }
 
