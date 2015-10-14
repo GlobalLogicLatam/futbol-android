@@ -37,7 +37,7 @@ public class OperationDatabaseHelper extends SQLiteOpenHelper {
 
     public OperationDatabaseHelper(Context context, String dbName) {
         super(context, dbName, null, 1);// 1? its Database Version
-        mDbName = context.getDatabasePath(dbName).getAbsolutePath();
+        mDbName = dbName;
         this.mContext = context;
     }
 
@@ -67,7 +67,11 @@ public class OperationDatabaseHelper extends SQLiteOpenHelper {
         // Open your local db as the input stream
         InputStream myInput = mContext.getAssets().open(getAssetPath());
         // Path to the just created empty db
-        String outFileName = mContext.getDatabasePath(mDbName).getAbsolutePath();
+        File databaseFile = mContext.getDatabasePath(mDbName);
+        if (!databaseFile.getParentFile().exists()) {
+            databaseFile.getParentFile().mkdir();
+        }
+        String outFileName = databaseFile.getAbsolutePath();
         // Open the empty db as the output stream
         OutputStream myOutput = new FileOutputStream(outFileName);
         // transfer bytes from the inputfile to the outputfile
