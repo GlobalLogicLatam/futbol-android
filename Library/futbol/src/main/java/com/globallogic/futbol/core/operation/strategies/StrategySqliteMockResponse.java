@@ -1,35 +1,34 @@
 package com.globallogic.futbol.core.operation.strategies;
 
-import java.io.Serializable;
+import android.database.Cursor;
 
 /**
  * Created by Agustin Larghi on 13/10/2015.
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public class StrategySqliteMockResponse implements Serializable {
-    private final String mAssetsDatabasePath;
-    private final String mQuery;
-    private int resultCode;
+public class StrategySqliteMockResponse extends StrategyMockResponse<Cursor> {
 
-    public StrategySqliteMockResponse(String databasePath, String query) {
-        mAssetsDatabasePath = databasePath;
-        mQuery = query;
+    private String query;
+
+    public StrategySqliteMockResponse(String assetFilename, String sqliQuery) {
+        setAssetsDatabasePath(assetFilename);
+        setQuery(sqliQuery);
     }
 
     public String getAssetsDatabasePath() {
-        return mAssetsDatabasePath;
+        return getStatus();
+    }
+
+    public void setAssetsDatabasePath(String assetsDatabasePath) {
+        setStatus(assetsDatabasePath);
     }
 
     public String getQuery() {
-        return mQuery;
+        return query;
     }
 
-    public int getResultCode() {
-        return resultCode;
-    }
-
-    public void setResultCode(int resultCode) {
-        this.resultCode = resultCode;
+    public void setQuery(String query) {
+        this.query = query;
     }
 }

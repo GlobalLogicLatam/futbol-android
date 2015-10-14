@@ -6,7 +6,6 @@ import android.util.Log;
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
-import com.globallogic.futbol.core.operation.strategies.FileOperationResponse;
 import com.globallogic.futbol.core.operation.strategies.StrategyFileMockResponse;
 
 import java.io.File;

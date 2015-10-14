@@ -1,40 +1,28 @@
 package com.globallogic.futbol.core.operation.strategies;
 
-import java.io.Serializable;
+import java.io.File;
 
-public class StrategyFileMockResponse implements Serializable {
-    private Integer httpCode;
-    private String filePath;
-
-    public StrategyFileMockResponse() {
-    }
+public class StrategyFileMockResponse extends StrategyMockResponse<File> {
 
     public StrategyFileMockResponse(int httpCode, String assetFilePath) {
-        this.httpCode = httpCode;
-        this.filePath = assetFilePath;
+        setHttpCode(httpCode);
+        setFilePath(assetFilePath);
     }
 
     public int getHttpCode() {
-        return httpCode;
+        return getIntCode();
     }
 
     public void setHttpCode(int httpCode) {
-        this.httpCode = httpCode;
+        setIntCode(httpCode);
     }
 
     public String getFilePath() {
-        return filePath;
+        return getStatus();
     }
 
     public void setFilePath(String filePath) {
-        this.filePath = filePath;
+        setStatus(filePath);
     }
 
-    @Override
-    public String toString() {
-        return "StrategyHttpMockResponse{" +
-                "httpCode=" + httpCode +
-                ", filePath='" + filePath + '\'' +
-                '}';
-    }
 }

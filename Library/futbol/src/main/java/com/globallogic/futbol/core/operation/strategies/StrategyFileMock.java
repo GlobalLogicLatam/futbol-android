@@ -3,8 +3,7 @@ package com.globallogic.futbol.core.operation.strategies;
 import android.util.Log;
 
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.interfaces.IStrategyCallback;
+import com.globallogic.futbol.core.operation.FileOperationResponse;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.File;
@@ -14,8 +13,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -23,49 +20,34 @@ import java.util.concurrent.TimeoutException;
  * Globallogic
  * agustin.larghi@globallogic.com
  */
-public class StrategyFileMock implements IOperationStrategy {
-    public static final String DETAIL_MESSAGE = "Hardcode dummy exception";
-    private static final String TAG = StrategyFileMock.class.getSimpleName();
-    protected final ArrayList<StrategyFileMockResponse> responses = new ArrayList<StrategyFileMockResponse>();
-    protected final ArrayList<Exception> responsesException = new ArrayList<Exception>();
-    private final Float mErrorProbability;
-    private Random random = new Random();
-    private IStrategyCallback mCallback;
+public class StrategyFileMock extends StrategyMock<StrategyFileMockResponse> {
 
-    /**
-     * A StrategyHttpMock allows to simulate any response that the server can return.
-     *
-     * @param errorProbability Determines the probability that the error occurs. If it is less than or equal to 0 returns a {@link StrategyHttpMockResponse} (or an exception if there is no added replies). If it is greater or equal to 1 always returns an exception
-     */
     public StrategyFileMock(float errorProbability) {
-        this.mErrorProbability = errorProbability;
+        super(errorProbability);
     }
 
     @Override
-    public void updateCallback(IStrategyCallback callback) {
-        this.mCallback = callback;
-    }
-
-    @Override
-    public void doRequest(IStrategyCallback callback) {
-        this.mCallback = callback;
-        if (random.nextFloat() < mErrorProbability) {
-            // Ejecuto un error
-            Exception mockException = getMockException();
-            if (mockException != null)
-                mCallback.parseResponse(mockException, new FileOperationResponse(0, null));
-            else
-                onNotResponseAdded();
+    protected void executeSuccessfulMockRequest() {
+        StrategyFileMockResponse mockResponse = (StrategyFileMockResponse) getMockResponse();
+        if (mockResponse != null) {
+            File fileInCache = copyFileFromAssetsToCache(mockResponse.getFilePath());
+            mCallback.parseResponse(null, new FileOperationResponse(mockResponse.getHttpCode(), fileInCache));
         } else {
-            // Retorno alguna respuesta dummy
-            StrategyFileMockResponse mockResponse = getMockResponse();
-            if (mockResponse != null) {
-                File fileInCache = copyFileFromAssetsToCache(mockResponse.getFilePath());
-                mCallback.parseResponse(null, new FileOperationResponse(mockResponse.getHttpCode(), fileInCache));
-            } else {
-                onNotResponseAdded();
-            }
+            onNotResponseAdded();
         }
+    }
+
+    protected void onNotResponseAdded() {
+        mCallback.parseResponse(new Exception(DETAIL_MESSAGE), new FileOperationResponse(0, null));
+    }
+
+    @Override
+    protected void executeFailedMockRequest() {
+        Exception mockException = getMockException();
+        if (mockException != null)
+            mCallback.parseResponse(mockException, new FileOperationResponse(0, null));
+        else
+            onNotResponseAdded();
     }
 
     private File copyFileFromAssetsToCache(String assetPath) {
@@ -112,24 +94,6 @@ public class StrategyFileMock implements IOperationStrategy {
         }
     }
 
-    private void onNotResponseAdded() {
-        mCallback.parseResponse(new Exception(DETAIL_MESSAGE), new FileOperationResponse(0, null));
-    }
-
-    private StrategyFileMockResponse getMockResponse() {
-        if (responses.size() > 0) {
-            return responses.get(random.nextInt(responses.size()));
-        }
-        return null;
-    }
-
-    private Exception getMockException() {
-        if (responsesException.size() > 0) {
-            return responsesException.get(random.nextInt(responsesException.size()));
-        }
-        return null;
-    }
-
     /**
      * Adds an expected response
      *
@@ -137,14 +101,6 @@ public class StrategyFileMock implements IOperationStrategy {
      */
     public StrategyFileMock add(StrategyFileMockResponse mockResponse) {
         responses.add(mockResponse);
-        return this;
-    }
-
-    /**
-     * Adds an expected exception
-     */
-    public StrategyFileMock add(Exception exception) {
-        responsesException.add(exception);
         return this;
     }
 
@@ -173,21 +129,4 @@ public class StrategyFileMock implements IOperationStrategy {
         return this;
     }
 
-    public StrategyFileMock addException() {
-        responsesException.add(new Exception(DETAIL_MESSAGE));
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StrategyFileMock)) return false;
-        StrategyFileMock that = (StrategyFileMock) o;
-        return responses.equals(that.responses);
-    }
-
-    @Override
-    public int hashCode() {
-        return responses.hashCode();
-    }
 }

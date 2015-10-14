@@ -1,4 +1,4 @@
-package com.globallogic.futbol.core.operation.strategies;
+package com.globallogic.futbol.core.operation;
 
 import android.database.Cursor;
 
@@ -10,7 +10,7 @@ import com.globallogic.futbol.core.OperationResponse;
  * agustin.larghi@globallogic.com
  */
 public class SqliteOperationResponse extends OperationResponse<String, Cursor> {
-    public SqliteOperationResponse(String aQuery, Cursor aCursor) {
-        super(aQuery, aCursor);
+    public SqliteOperationResponse(Cursor aCursor) {
+        super(null, aCursor);
     }
 }

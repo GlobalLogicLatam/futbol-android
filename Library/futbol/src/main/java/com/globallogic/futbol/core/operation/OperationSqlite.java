@@ -7,7 +7,6 @@ import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.operation.database.OperationDatabaseHelper;
-import com.globallogic.futbol.core.operation.strategies.SqliteOperationResponse;
 import com.globallogic.futbol.core.operation.strategies.StrategySqliteMockResponse;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public abstract class OperationSqlite extends Operation<String, Cursor> {
                     mHelper.openDataBase();
                     Cursor resultCursor = mHelper.getReadableDatabase().rawQuery(aMockResponse.getQuery(), null);
                     mHelper.close();
-                    result = workInBackground(null, aMockResponse.getResultCode(), resultCursor);
+                    result = workInBackground(null, 0, resultCursor);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -134,7 +133,7 @@ public abstract class OperationSqlite extends Operation<String, Cursor> {
             return false;
         } else {
             try {
-                if (!analyzeResult(new SqliteOperationResponse("", aResponse)))
+                if (!analyzeResult(new SqliteOperationResponse(aResponse)))
                     throw new UnexpectedResponseException();
             } catch (Exception e2) {
                 mLogger.log(Level.INFO, "Error in analyzeResult: " + e2.getMessage(), e2);

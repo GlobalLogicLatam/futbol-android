@@ -1,4 +1,4 @@
-package com.globallogic.futbol.core.operation.strategies;
+package com.globallogic.futbol.core.operation;
 
 import com.globallogic.futbol.core.OperationResponse;
 
