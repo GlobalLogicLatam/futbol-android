@@ -16,6 +16,7 @@ import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
 import com.globallogic.futbol.example.fragments.GetFileFragment;
 import com.globallogic.futbol.example.fragments.GetPageFragment;
+import com.globallogic.futbol.example.fragments.PostFileFragment;
 import com.globallogic.futbol.example.fragments.PostPageFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 import com.globallogic.futbol.example.fragments.PutPageFragment;
@@ -90,6 +91,13 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
             addFragment(CreateDeviceFragment.newInstance(), CreateDeviceFragment.TAG);
         else
             startActivity(CreateDeviceFragment.TAG);
+    }
+    @Override
+    public void onExamplePostSingleFile() {
+        if (isTwoPane)
+            addFragment(PostFileFragment.newInstance(), PostFileFragment.TAG);
+        else
+            startActivity(PostFileFragment.TAG);
     }
     @Override
     public void onExampleDeleteItem() {

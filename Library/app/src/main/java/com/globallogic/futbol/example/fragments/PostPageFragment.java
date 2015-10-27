@@ -40,6 +40,7 @@ public class PostPageFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post_page, container, false);
         rootView.findViewById(R.id.fragment_post_page_submit_item).setOnClickListener(this);
+        rootView.findViewById(R.id.fragment_post_page_submit_file).setOnClickListener(this);
         return rootView;
     }
 
@@ -49,10 +50,14 @@ public class PostPageFragment extends Fragment implements View.OnClickListener {
             case R.id.fragment_post_page_submit_item:
                 mCallback.onExamplePostSingleString();
                 break;
+            case R.id.fragment_post_page_submit_file:
+                mCallback.onExamplePostSingleFile();
+                break;
         }
     }
 
     public interface ICallback {
         void onExamplePostSingleString();
+        void onExamplePostSingleFile();
     }
 }

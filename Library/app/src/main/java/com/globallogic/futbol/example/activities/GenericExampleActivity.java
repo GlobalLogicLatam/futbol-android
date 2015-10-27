@@ -13,6 +13,7 @@ import com.globallogic.futbol.example.fragments.GetDeviceFragment;
 import com.globallogic.futbol.example.fragments.GetDevicesFragment;
 import com.globallogic.futbol.example.fragments.GetExampleTimeOutFragment;
 import com.globallogic.futbol.example.fragments.GetFileFragment;
+import com.globallogic.futbol.example.fragments.PostFileFragment;
 import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 import com.globallogic.futbol.example.fragments.SelectDevicesFragment;
 
@@ -59,7 +60,11 @@ public class GenericExampleActivity extends Activity {
                 case SelectDevicesFragment.TAG:
                     fragment = SelectDevicesFragment.newInstance();
                     break;
+                case PostFileFragment.TAG:
+                    fragment = PostFileFragment.newInstance();
+                    break;
             }
+            recreate();
             if (fragment != null)
                 getFragmentManager().beginTransaction().replace(R.id.generic_example_container, fragment, tag).commit();
         }

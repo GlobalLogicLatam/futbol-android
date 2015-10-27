@@ -10,11 +10,19 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/fragment_post_page_submit_item"
+        android:id="@+id/fragment_post_page_submit_item"
+        style="@style/TextItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/post_submit"/>
+
+        <TextView
+            android:id="@+id/fragment_post_page_submit_file"
             style="@style/TextItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/post_submit"/>
+            android:text="@string/post_file"/>
+
     </LinearLayout>
 </ScrollView>
 

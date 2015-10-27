@@ -30,4 +30,7 @@
     <string name="not_found">Not found</string>
     <string name="get_file">Get file</string>
     <string name="select_devices">Select devices</string>
+    <string name="post_file">Upload file</string>
+    <string name="button_choose_file">Choose a file to upload</string>
+    <string name="file_to_upload_placeholder">File to upload: </string>
 </resources>
