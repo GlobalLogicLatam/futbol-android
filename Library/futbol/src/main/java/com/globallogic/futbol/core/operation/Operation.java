@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
+import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.interfaces.IOperation;
 import com.globallogic.futbol.core.interfaces.IOperationStrategy;
 import com.globallogic.futbol.core.interfaces.IStrategyCallback;
@@ -33,6 +34,37 @@ public abstract class Operation<Z, T> implements Serializable, IOperation<Z, T>,
     private static final String SAVE_INSTANCE_RESULT = "SAVE_INSTANCE_RESULT";
     private static final String SAVE_INSTANCE_STATE = "SAVE_INSTANCE_STATE";
     private static final String SAVE_INSTANCE_STRATEGY = "SAVE_INSTANCE_STRATEGY";
+    //endregion
+
+    //region IStrategyCallback
+
+    /**
+     * Analysis of the response returned by the server
+     *
+     * @param aException the exception thrown because of some error
+     * @param aResponse the http response
+     * @see OperationHttp#workInBackground(Exception, int, String)
+     * @see OperationHttp#afterWorkInBackground(Boolean)
+     */
+
+    @Override
+    public void parseResponse(final Exception aException, final OperationResponse<Z, T> aResponse) {
+        if (aException != null)
+            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
+        // Parse and analyze
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return workInBackground(aException, aResponse.getResultCode(), aResponse.getResult());
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                afterWorkInBackground(result);
+            }
+        }.execute((Void) null);
+    }
     //endregion
 
     //region Log
@@ -73,7 +105,7 @@ public abstract class Operation<Z, T> implements Serializable, IOperation<Z, T>,
                     return false;
                 }
                 beforeWorkInBackground();
-                Boolean result = workInBackground(anException, 0, null);
+                Boolean result = workInBackground(anException, null, null);
                 afterWorkInBackground(result);
                 return true;
             case FINISHED_EXECUTION:
@@ -85,8 +117,7 @@ public abstract class Operation<Z, T> implements Serializable, IOperation<Z, T>,
         }
     }
 
-    protected abstract Boolean workInBackground(Exception anException, int aStatusCode, T aResponse);
-
+    protected abstract Boolean workInBackground(Exception anException, Z aStatusCode, T aResponse);
 
     //endregion
 

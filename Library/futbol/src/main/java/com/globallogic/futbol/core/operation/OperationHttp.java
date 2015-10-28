@@ -1,9 +1,5 @@
 package com.globallogic.futbol.core.operation;
 
-import android.os.AsyncTask;
-import android.text.TextUtils;
-
-import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.operation.strategies.StrategyHttpMockResponse;
 
@@ -44,7 +40,7 @@ public abstract class OperationHttp extends Operation<Integer, String> {
      * Run the operation synchronously and return the response expected in the callback of the broadcast
      *
      * @see OperationHttp#beforeWorkInBackground()
-     * @see OperationHttp#workInBackground(Exception, int, String)
+     * @see OperationHttp#workInBackground(Exception, Integer, String)
      * @see OperationHttp#afterWorkInBackground(Boolean)
      */
     public Boolean testResponse(StrategyHttpMockResponse aMockResponse) {
@@ -70,45 +66,11 @@ public abstract class OperationHttp extends Operation<Integer, String> {
                 return false;
         }
     }
-
-    //endregion
-
-    //region IStrategyCallback
-    /**
-     * Analysis of the response returned by the server
-     *
-     * @param aException the exception thrown because of some error
-     * @param aResponse the http response
-     * @see OperationHttp#workInBackground(Exception, int, String)
-     * @see OperationHttp#afterWorkInBackground(Boolean)
-     */
-
-    @Override
-    public void parseResponse(final Exception aException, final OperationResponse<Integer, String> aResponse) {
-        if (aException != null)
-            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
-        if (TextUtils.isEmpty(aResponse.getResult()) || !(aResponse.getResult().startsWith("{") || aResponse.getResult().startsWith("[")))
-            mLogger.severe(String.format("Parsing response: %s", aResponse.getResult()));
-        else
-            mLogger.info(String.format("Parsing response: %s", aResponse.getResult()));
-
-        // Parse and analyze
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return workInBackground(aException, aResponse.getResultCode(), aResponse.getResult());
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-                afterWorkInBackground(result);
-            }
-        }.execute((Void) null);
-    }
     //endregion
 
     //region IOperation
+
+
 
     /**
      * Analyze the parameters to determine what would do
@@ -118,7 +80,7 @@ public abstract class OperationHttp extends Operation<Integer, String> {
      * @param aString     The aString obtained
      * @see OperationHttp#analyzeException(Exception)
      */
-    protected Boolean workInBackground(Exception anException, int aHttpCode, String aString) {
+    protected Boolean workInBackground(Exception anException, Integer aHttpCode, String aString) {
         mLogger.info("Work in background");
         if (anException != null) {
             analyzeException(anException);

@@ -1,10 +1,8 @@
 package com.globallogic.futbol.core.operation;
 
 import android.database.Cursor;
-import android.os.AsyncTask;
 
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.operation.database.OperationDatabaseHelper;
 import com.globallogic.futbol.core.operation.strategies.StrategySqliteMockResponse;
@@ -70,7 +68,7 @@ public abstract class OperationSqlite extends Operation<String, Cursor> {
                     mHelper.openDataBase();
                     Cursor resultCursor = mHelper.getReadableDatabase().rawQuery(aMockResponse.getQuery(), null);
                     mHelper.close();
-                    result = workInBackground(null, 0, resultCursor);
+                    result = workInBackground(null, null, resultCursor);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -86,39 +84,6 @@ public abstract class OperationSqlite extends Operation<String, Cursor> {
     }
     //endregion
 
-    //region IStrategyCallback
-
-    /**
-     * Analysis of the response returned by the server
-     *
-     * @param aException the exception thrown because of some error
-     * @param aResponse  the http response
-     * @see OperationHttp#workInBackground(Exception, int, String)
-     * @see OperationHttp#afterWorkInBackground(Boolean)
-     */
-
-    @Override
-    public void parseResponse(final Exception aException, final OperationResponse<String, Cursor> aResponse) {
-        if (aException != null)
-            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
-        // Parse and analyze
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return workInBackground(aException, 0, aResponse.getResult());
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-                afterWorkInBackground(result);
-            }
-        }.execute((Void) null);
-    }
-    //endregion
-
-    //region IOperation
-
     /**
      * Analyze the parameters to determine what would do
      *
@@ -126,7 +91,9 @@ public abstract class OperationSqlite extends Operation<String, Cursor> {
      * @param aStatusCode The code obtained
      * @see OperationHttp#analyzeException(Exception)
      */
-    protected Boolean workInBackground(Exception anException, int aStatusCode, Cursor aResponse) {
+
+
+    protected Boolean workInBackground(Exception anException, String aStatusCode, Cursor aResponse) {
         mLogger.info("Work in background");
         if (anException != null) {
             analyzeException(anException);

@@ -67,23 +67,26 @@ public class StrategyFileMock extends StrategyMock<StrategyFileMockResponse> {
             copyFile(in, out);
         } catch (IOException e) {
             Log.e("tag", "Failed to copy asset file: " + assetPath, e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            File sdFile = new File(assetPath);
+            if (sdFile.exists()) {
+                return sdFile;
             }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return outFile;
         }
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (out != null) {
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return outFile;
     }
 
     private void copyFile(InputStream in, OutputStream out) throws IOException {

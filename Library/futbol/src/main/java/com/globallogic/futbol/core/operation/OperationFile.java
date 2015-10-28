@@ -1,10 +1,8 @@
 package com.globallogic.futbol.core.operation;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.OperationResponse;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.operation.strategies.StrategyFileMockResponse;
 
@@ -130,42 +128,9 @@ public abstract class OperationFile extends Operation<Integer, File> {
             out.write(buffer, 0, read);
         }
     }
-
-    //endregion
-
-    //region IStrategyCallback
-
-    /**
-     * Analysis of the response returned by the server
-     *
-     * @param aException the exception thrown because of some error
-     * @param aResponse the http response
-     * @see OperationHttp#workInBackground(Exception, int, String)
-     * @see OperationHttp#afterWorkInBackground(Boolean)
-     */
-
-    @Override
-    public void parseResponse(final Exception aException, final OperationResponse<Integer, File> aResponse) {
-        if (aException != null)
-            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", aException.getMessage()), aException);
-        // Parse and analyze
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return workInBackground(aException, aResponse.getResultCode(), aResponse.getResult());
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-                afterWorkInBackground(result);
-            }
-        }.execute((Void) null);
-    }
     //endregion
 
     //region IOperation
-
     /**
      * Analyze the parameters to determine what would do
      *
@@ -173,7 +138,7 @@ public abstract class OperationFile extends Operation<Integer, File> {
      * @param aHttpCode   The httpCode obtained
      * @see OperationHttp#analyzeException(Exception)
      */
-    protected Boolean workInBackground(Exception anException, int aHttpCode, File aFile) {
+    protected Boolean workInBackground(Exception anException, Integer aHttpCode, File aFile) {
         mLogger.info("Work in background");
         if (anException != null) {
             analyzeException(anException);
@@ -190,7 +155,6 @@ public abstract class OperationFile extends Operation<Integer, File> {
             return true;
         }
     }
-
     //endregion
 
 }
