@@ -62,7 +62,7 @@ public abstract class OperationFile extends Operation<Integer, File> {
      * Run the operation synchronously and return the response expected in the callback of the broadcast
      *
      * @see OperationHttp#beforeWorkInBackground()
-     * @see OperationHttp#workInBackground(Exception, int, String)
+     * @see OperationHttp#workInBackground(Exception, Integer, String)
      * @see OperationHttp#afterWorkInBackground(Boolean)
      */
     protected Boolean testResponse(StrategyFileMockResponse aMockResponse) {

@@ -30,8 +30,16 @@ public class StrategyFileMock extends StrategyMock<StrategyFileMockResponse> {
     protected void executeSuccessfulMockRequest() {
         StrategyFileMockResponse mockResponse = (StrategyFileMockResponse) getMockResponse();
         if (mockResponse != null) {
-            File fileInCache = copyFileFromAssetsToCache(mockResponse.getFilePath());
-            mCallback.parseResponse(null, new FileOperationResponse(mockResponse.getHttpCode(), fileInCache));
+            File fileResult = null;
+            switch (mockResponse.getLocation()) {
+                case ASSETS:
+                    fileResult = copyFileFromAssetsToCache(mockResponse.getFilePath());
+                    break;
+                case SD_CARD:
+                    fileResult = copyFileFromSd(mockResponse.getFilePath());
+                    break;
+            }
+            mCallback.parseResponse(null, new FileOperationResponse(mockResponse.getHttpCode(), fileResult));
         } else {
             onNotResponseAdded();
         }
@@ -48,6 +56,15 @@ public class StrategyFileMock extends StrategyMock<StrategyFileMockResponse> {
             mCallback.parseResponse(mockException, new FileOperationResponse(0, null));
         else
             onNotResponseAdded();
+    }
+
+    private File copyFileFromSd(String path) {
+        File sdFile = new File(path);
+        if (sdFile.exists()) {
+            return sdFile;
+        } else {
+            return null;
+        }
     }
 
     private File copyFileFromAssetsToCache(String assetPath) {
@@ -67,26 +84,23 @@ public class StrategyFileMock extends StrategyMock<StrategyFileMockResponse> {
             copyFile(in, out);
         } catch (IOException e) {
             Log.e("tag", "Failed to copy asset file: " + assetPath, e);
-            File sdFile = new File(assetPath);
-            if (sdFile.exists()) {
-                return sdFile;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            return outFile;
         }
-        if (out != null) {
-            try {
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return outFile;
     }
 
     private void copyFile(InputStream in, OutputStream out) throws IOException {

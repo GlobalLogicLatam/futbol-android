@@ -4,9 +4,25 @@ import java.io.File;
 
 public class StrategyFileMockResponse extends StrategyMockResponse<File> {
 
-    public StrategyFileMockResponse(int httpCode, String assetFilePath) {
+    public enum FileLocation {
+        ASSETS,
+        SD_CARD
+    }
+
+    private FileLocation mLocation;
+
+    public StrategyFileMockResponse(int httpCode, String assetFilePath, FileLocation location) {
         setHttpCode(httpCode);
         setFilePath(assetFilePath);
+        setLocation(location);
+    }
+
+    public FileLocation getLocation() {
+        return mLocation;
+    }
+
+    public void setLocation(FileLocation mLocation) {
+        this.mLocation = mLocation;
     }
 
     public int getHttpCode() {
