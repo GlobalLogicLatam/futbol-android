@@ -55,7 +55,7 @@ public class DashboardActivity extends Activity implements GetPageFragment.ICall
     @Override
     public void onExampleGetSuccess() {
         if (isTwoPane)
-            addFragment(GetDeviceFragment.newInstance(), GetDeviceFragment.TAG);
+            addFragment(GetDeviceFragment.newInstance(1), GetDeviceFragment.TAG);
         else
             startActivity(GetDeviceFragment.TAG);
     }
