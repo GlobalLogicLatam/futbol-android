@@ -5,11 +5,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.entities.Device;
+import com.globallogic.futbol.example.domain.models.Device;
 import com.globallogic.futbol.example.interfaces.IDevicesAdapterCallbacks;
 
 /**
- * Created by facundo.mengoni on 10/5/2015.
+ * @author facundo.mengoni
  */
 public class DeviceViewHolder extends RecyclerView.ViewHolder {
 

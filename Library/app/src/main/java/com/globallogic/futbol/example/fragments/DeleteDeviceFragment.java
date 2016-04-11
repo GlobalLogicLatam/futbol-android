@@ -12,8 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.entities.Device;
-import com.globallogic.futbol.example.operations.DeleteDeviceOperation;
+import com.globallogic.futbol.example.domain.models.Device;
+import com.globallogic.futbol.example.domain.operations.DeleteDeviceOperation;
 
 /**
  * Created by Ezequiel Sanz on 11/05/15.
@@ -50,7 +50,6 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
         enableButtons(false);
     }
 
@@ -73,9 +72,8 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mDeleteDeviceOperation.onCreate(savedInstanceState);
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
@@ -87,15 +85,9 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
         vSubmit.setOnClickListener(this);
         vOperationResult = (TextView) rootView.findViewById(R.id.fragment_delete_example_erase_device_result);
 
-        mDeleteDeviceReceiver.register(mDeleteDeviceOperation);
+        mDeleteDeviceReceiver.startListening(mDeleteDeviceOperation);
 
         return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        updateOperationStatus();
     }
 
     @Override
@@ -123,39 +115,10 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
         }
     }
 
-    private void updateOperationStatus() {
-        switch (mDeleteDeviceOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationResult.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationResult.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationResult.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationResult.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationResult.setText("Some error");
-                break;
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //Guardo los datos necesario de la operacion
-        mDeleteDeviceOperation.onSaveInstanceState(outState);
-    }
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mDeleteDeviceReceiver.unRegister();
+        mDeleteDeviceReceiver.stopListening();
     }
 }

@@ -1,12 +1,13 @@
 package com.globallogic.futbol.example.adapters;
 
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.globallogic.futbol.example.BuildConfig;
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.entities.Device;
+import com.globallogic.futbol.example.domain.models.Device;
 import com.globallogic.futbol.example.interfaces.IDevicesAdapterCallbacks;
 import com.globallogic.futbol.example.viewholders.DeviceViewHolder;
 
@@ -15,11 +16,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by facundo.mengoni on 10/5/2015.
+ * @author facundo.mengoni
  */
 public class DevicesAdapter extends RecyclerView.Adapter<DeviceViewHolder> implements IDevicesAdapterCallbacks {
     //region Constants
     public static final String TAG = DevicesAdapter.class.getSimpleName();
+    private static final String SAVED_INSTANCE_LIST = "SAVED_INSTANCE_LIST";
     //endregion
 
     //region Variables
@@ -53,6 +55,15 @@ public class DevicesAdapter extends RecyclerView.Adapter<DeviceViewHolder> imple
         holder.load(getDevice(position));
     }
 
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(SAVED_INSTANCE_LIST, mList);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void onRestoreInstance(Bundle savedInstanceState) {
+        mList = (ArrayList<Device>) savedInstanceState.getSerializable(SAVED_INSTANCE_LIST);
+    }
+
     @Override
     public long getItemId(int position) {
         return getDevice(position).getId();
@@ -65,9 +76,6 @@ public class DevicesAdapter extends RecyclerView.Adapter<DeviceViewHolder> imple
     //endregion
 
     //region Private API
-    private Device getDevice(int aPosition) {
-        return mList.get(aPosition);
-    }
     // endregion
 
     //region IDevicesAdapterCallbacks
@@ -79,8 +87,9 @@ public class DevicesAdapter extends RecyclerView.Adapter<DeviceViewHolder> imple
 
     //region Public API
     public void addList(ArrayList<Device> aList) {
-        mList.addAll(new ArrayList<Device>(aList));
-        notifyDataSetChanged();
+        for (Device device : aList) {
+            update(device);
+        }
     }
 
     public void update(Device aDevice) {
@@ -93,6 +102,10 @@ public class DevicesAdapter extends RecyclerView.Adapter<DeviceViewHolder> imple
             index = mList.indexOf(aDevice);
             notifyItemInserted(index);
         }
+    }
+
+    public Device getDevice(int aPosition) {
+        return mList.get(aPosition);
     }
     // endregion
 }

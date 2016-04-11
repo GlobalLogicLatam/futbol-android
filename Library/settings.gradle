@@ -1,1 +1,1 @@
-include ':app', ':futbol'
+include ':app', ':domain', ':data', ':futbol'
