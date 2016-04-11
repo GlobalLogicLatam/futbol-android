@@ -35,14 +35,9 @@ public class UpdateDeviceOperation extends BaseOperation {
         String name = (String) arg[1];
         String resolution = (String) arg[2];
 
-        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new IStrategyHttpAnalyzer() {
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new BaseHttpAnalyzer() {
             private Device mDevice;
             private boolean mNotFound;
-
-            @Override
-            public void analyzeException(Exception anException) {
-                UpdateDeviceOperation.this.analyzeException(anException);
-            }
 
             @Override
             public Boolean analyzeResult(Integer aHttpCode, String aString) {
@@ -55,11 +50,6 @@ public class UpdateDeviceOperation extends BaseOperation {
                         return true;
                 }
                 return false;
-            }
-
-            @Override
-            public void addExtrasForResultError(Intent intent) {
-                UpdateDeviceOperation.this.addExtrasForResultError(intent);
             }
 
             @Override

@@ -33,14 +33,9 @@ public class DeleteDeviceOperation extends BaseOperation {
     protected ArrayList<OperationStrategy> getStrategies(Object... arg) {
         String id = (String) arg[0];
 
-        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new IStrategyHttpAnalyzer() {
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new BaseHttpAnalyzer() {
             private Device mDevice;
             private boolean mNotFound;
-
-            @Override
-            public void analyzeException(Exception anException) {
-                DeleteDeviceOperation.this.analyzeException(anException);
-            }
 
             @Override
             public Boolean analyzeResult(Integer aHttpCode, String aString) {
@@ -53,11 +48,6 @@ public class DeleteDeviceOperation extends BaseOperation {
                         return true;
                 }
                 return false;
-            }
-
-            @Override
-            public void addExtrasForResultError(Intent intent) {
-                DeleteDeviceOperation.this.addExtrasForResultError(intent);
             }
 
             @Override

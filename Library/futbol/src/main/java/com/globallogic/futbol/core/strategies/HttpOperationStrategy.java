@@ -3,7 +3,6 @@ package com.globallogic.futbol.core.strategies;
 import android.content.Intent;
 import android.text.TextUtils;
 
-import com.globallogic.futbol.core.utils.Utils;
 import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.OperationResult;
@@ -13,6 +12,7 @@ import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.interfaces.parsers.IOperationHttpParser;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategyHttpResponse;
+import com.globallogic.futbol.core.utils.Utils;
 
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -98,8 +98,12 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
     @Override
     public void parseResponse(Exception anException, StrategyHttpResponse aStrategyResponse) {
         Utils.thisMethodShouldNotExecuteInTheThreadUI();
-        String aString = aStrategyResponse.getResponse();
-        Integer aHttpCode = aStrategyResponse.getHttpCode();
+        String aString = "";
+        Integer aHttpCode = 0;
+        if (aStrategyResponse != null) {
+            aString = aStrategyResponse.getResponse();
+            aHttpCode = aStrategyResponse.getHttpCode();
+        }
         if (anException != null)
             mLogger.log(Level.SEVERE, String.format("Parsing response: %s", anException.getMessage()), anException);
         if (TextUtils.isEmpty(aString) || !(aString.startsWith("{") || aString.startsWith("[")))

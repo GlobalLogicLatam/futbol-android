@@ -1,11 +1,11 @@
 package com.globallogic.futbol.core.strategies;
 
-import com.globallogic.futbol.core.utils.Utils;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.interfaces.analyzers.IStrategyDbAnalyzer;
 import com.globallogic.futbol.core.interfaces.parsers.IOperationDbParser;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategyDbResponse;
+import com.globallogic.futbol.core.utils.Utils;
 
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -63,7 +63,10 @@ public abstract class DbOperationStrategy<T> extends OperationStrategy<StrategyD
     @Override
     public void parseResponse(Exception anException, StrategyDbResponse<T> aStrategyResponse) {
         Utils.thisMethodShouldNotExecuteInTheThreadUI();
-        T aResponse = aStrategyResponse.getResponse();
+        T aResponse = null;
+        if (aStrategyResponse != null) {
+            aResponse = aStrategyResponse.getResponse();
+        }
         boolean result = workInBackground(anException, aResponse);
         afterWorkInBackground(result);
     }

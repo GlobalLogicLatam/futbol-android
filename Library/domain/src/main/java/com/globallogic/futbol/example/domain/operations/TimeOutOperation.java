@@ -2,14 +2,12 @@ package com.globallogic.futbol.example.domain.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.interfaces.callbacks.IStrategyHttpCallback;
 import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
 import com.globallogic.futbol.core.strategies.OperationStrategy;
 import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -25,20 +23,10 @@ public class TimeOutOperation extends BaseOperation {
 
     @Override
     protected ArrayList<OperationStrategy> getStrategies(Object... arg) {
-        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new IStrategyHttpAnalyzer() {
-            @Override
-            public void analyzeException(Exception anException) {
-
-            }
-
+        StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, new BaseHttpAnalyzer() {
             @Override
             public Boolean analyzeResult(Integer aHttpCode, String aString) {
                 return true;
-            }
-
-            @Override
-            public void addExtrasForResultError(Intent intent) {
-                TimeOutOperation.this.addExtrasForResultError(intent);
             }
 
             @Override

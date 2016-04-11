@@ -3,6 +3,7 @@ package com.globallogic.futbol.example.domain.operations;
 import android.content.Context;
 import android.content.Intent;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.operations.OperationHelper;
 import com.globallogic.futbol.example.domain.R;
@@ -30,49 +31,53 @@ public abstract class BaseOperation extends Operation {
         setConnectionDelay(TimeUnit.SECONDS.toMillis(SECONDS));
     }
 
-    public void analyzeException(Exception e) {
-        OperationHelper.analyzeException(e, new OperationHelper.ExceptionCallback() {
-            @Override
-            public void jsonSyntaxException() {
-                errorResource = R.string.error_json_syntax_exception;
-            }
-
-            @Override
-            public void timeOutException() {
-                errorResource = R.string.error_time_out_exception;
-            }
-
-            @Override
-            public void socketException() {
-                errorResource = R.string.error_socket_exception;
-            }
-
-            @Override
-            public void malformedURLException() {
-                errorResource = R.string.error_malformed_url_exception;
-            }
-
-            @Override
-            public void ioException() {
-                errorResource = R.string.error_io_exception;
-            }
-
-            @Override
-            public void otherException() {
-                errorResource = R.string.error_other_exception;
-            }
-
-            @Override
-            public void unexpectedResponseException() {
-                errorResource = R.string.error_unexpected_response_exception;
-            }
-        });
-    }
-
-    protected void addExtrasForResultError(Intent intent) {
-    }
-
     public String getError(Context aContext) {
         return aContext.getString(errorResource);
+    }
+
+    public abstract class BaseHttpAnalyzer implements IStrategyHttpAnalyzer {
+        @Override
+        public void analyzeException(Exception anException) {
+            OperationHelper.analyzeException(anException, new OperationHelper.ExceptionCallback() {
+                @Override
+                public void jsonSyntaxException() {
+                    errorResource = R.string.error_json_syntax_exception;
+                }
+
+                @Override
+                public void timeOutException() {
+                    errorResource = R.string.error_time_out_exception;
+                }
+
+                @Override
+                public void socketException() {
+                    errorResource = R.string.error_socket_exception;
+                }
+
+                @Override
+                public void malformedURLException() {
+                    errorResource = R.string.error_malformed_url_exception;
+                }
+
+                @Override
+                public void ioException() {
+                    errorResource = R.string.error_io_exception;
+                }
+
+                @Override
+                public void otherException() {
+                    errorResource = R.string.error_other_exception;
+                }
+
+                @Override
+                public void unexpectedResponseException() {
+                    errorResource = R.string.error_unexpected_response_exception;
+                }
+            });
+        }
+
+        @Override
+        public void addExtrasForResultError(Intent intent) {
+        }
     }
 }
