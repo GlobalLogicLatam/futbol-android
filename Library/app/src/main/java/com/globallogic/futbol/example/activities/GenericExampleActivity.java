@@ -17,10 +17,16 @@ import com.globallogic.futbol.example.fragments.PutExampleUpdateDeviceFragment;
 public class GenericExampleActivity extends Activity {
 
     public static final String EXTRA_TAG = "EXTRA_TAG";
+    public static final String EXTRA_ID = "EXTRA_ID";
 
     public static Intent generateIntent(Context aContext, String aFragmentTag) {
+        return generateIntent(aContext, aFragmentTag, null);
+    }
+
+    public static Intent generateIntent(Context aContext, String aFragmentTag, Integer anId) {
         Intent intent = new Intent(aContext, GenericExampleActivity.class);
         intent.putExtra(EXTRA_TAG, aFragmentTag);
+        intent.putExtra(EXTRA_ID, anId);
         return intent;
     }
 
@@ -31,13 +37,14 @@ public class GenericExampleActivity extends Activity {
 
         if (savedInstanceState == null) {
             String tag = getIntent().getStringExtra(EXTRA_TAG);
+            Integer id = getIntent().getIntExtra(EXTRA_ID, 0);
             Fragment fragment = null;
             switch (tag) {
                 case GetDevicesFragment.TAG:
                     fragment = GetDevicesFragment.newInstance();
                     break;
                 case GetDeviceFragment.TAG:
-                    fragment = GetDeviceFragment.newInstance();
+                    fragment = GetDeviceFragment.newInstance(id);
                     break;
                 case GetExampleTimeOutFragment.TAG:
                     fragment = GetExampleTimeOutFragment.newInstance();

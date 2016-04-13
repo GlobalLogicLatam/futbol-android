@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.globallogic.futbol.example.R;
-import com.globallogic.futbol.example.operations.TimeOutOperation;
+import com.globallogic.futbol.example.domain.operations.TimeOutOperation;
 
 /**
  * Created by Ezequiel Sanz on 11/05/15.
@@ -39,25 +39,21 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
     }
 
     @Override
     public void onSuccess() {
-        updateOperationStatus();
         vOperationResult.setText("Success");
     }
 
     @Override
     public void onError() {
-        updateOperationStatus();
         vOperationResult.setText(mTimeOutOperation.getError(getActivity()));
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mTimeOutOperation.onCreate(savedInstanceState);
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
@@ -67,7 +63,7 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
         vOperationStatus = (TextView) rootView.findViewById(R.id.operation_status);
         vOperationResult = (TextView) rootView.findViewById(R.id.operation_result);
 
-        mTimeOutReceiver.register(mTimeOutOperation);
+        mTimeOutReceiver.startListening(mTimeOutOperation);
 
         return rootView;
     }
@@ -82,39 +78,10 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
         mTimeOutOperation.execute();
     }
 
-    private void updateOperationStatus() {
-        switch (mTimeOutOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationStatus.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationStatus.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationStatus.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationStatus.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationStatus.setText("Some error");
-                break;
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //Guardo los datos necesario de la operacion
-        mTimeOutOperation.onSaveInstanceState(outState);
-    }
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mTimeOutReceiver.unRegister();
+        mTimeOutReceiver.stopListening();
     }
 }
