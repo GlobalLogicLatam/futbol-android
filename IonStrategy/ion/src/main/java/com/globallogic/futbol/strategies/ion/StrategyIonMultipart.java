@@ -1,5 +1,7 @@
 package com.globallogic.futbol.strategies.ion;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
 import com.koushikdutta.async.http.body.Part;
 import com.koushikdutta.ion.builder.Builders;
 
@@ -9,13 +11,13 @@ public abstract class StrategyIonMultipart extends StrategyIonBasic {
     private static final String TAG = StrategyIonMultipart.class.getSimpleName();
     private final ArrayList<Part> mArrayList;
 
-    public StrategyIonMultipart(String aUrl, ArrayList<Part> mArrayList) {
-        super(aUrl);
+    public StrategyIonMultipart(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, ArrayList<Part> mArrayList) {
+        super(anOperation, anAnalyzer, aUrl);
         this.mArrayList = mArrayList;
     }
 
-    public StrategyIonMultipart(StrategyIonConfig aStrategyIonConfig, String aUrl, ArrayList<Part> mArrayList) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonMultipart(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, ArrayList<Part> mArrayList) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         this.mArrayList = mArrayList;
     }
 

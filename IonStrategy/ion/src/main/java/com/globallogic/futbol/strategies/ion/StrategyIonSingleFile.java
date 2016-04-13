@@ -1,5 +1,7 @@
 package com.globallogic.futbol.strategies.ion;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
 import com.koushikdutta.ion.builder.Builders;
 
 import java.io.File;
@@ -8,13 +10,13 @@ public abstract class StrategyIonSingleFile extends StrategyIonBasic {
     private static final String TAG = StrategyIonSingleFile.class.getSimpleName();
     private final File mFile;
 
-    public StrategyIonSingleFile(String aUrl, File mFile) {
-        super(aUrl);
+    public StrategyIonSingleFile(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, File mFile) {
+        super(anOperation, anAnalyzer, aUrl);
         this.mFile = mFile;
     }
 
-    public StrategyIonSingleFile(StrategyIonConfig aStrategyIonConfig, String aUrl, File mFile) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonSingleFile(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, File mFile) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         this.mFile = mFile;
     }
 

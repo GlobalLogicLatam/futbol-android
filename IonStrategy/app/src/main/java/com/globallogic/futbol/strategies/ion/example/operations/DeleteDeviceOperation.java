@@ -2,17 +2,21 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
-import com.globallogic.futbol.core.operation.OperationHelper;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
+import com.globallogic.futbol.core.interfaces.callbacks.IStrategyHttpCallback;
+import com.globallogic.futbol.core.operations.OperationHelper;
+import com.globallogic.futbol.core.responses.StrategyHttpResponse;
+import com.globallogic.futbol.core.strategies.OperationStrategy;
+import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
 import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringDelete;
+import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringPost;
 import com.globallogic.futbol.strategies.ion.example.BuildConfig;
 import com.globallogic.futbol.strategies.ion.example.entities.Device;
 import com.globallogic.futbol.strategies.ion.example.operations.helper.ExampleOperation;
+import com.google.gson.JsonObject;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 /**
  * Created by Facundo Mengoni on 8/6/2015.
@@ -24,63 +28,56 @@ public class DeleteDeviceOperation extends ExampleOperation {
     private Boolean mock = false || BuildConfig.MOCK;
 
     private String mUrl = "http://172.17.201.125:1337/device/%s";
-    private Device mDevice;
-    private boolean mNotFound;
-
-    @Override
-    public void reset() {
-        super.reset();
-        mDevice = null;
-        mNotFound = false;
-    }
 
     public void execute(String id) {
-        reset();
         performOperation(id);
     }
 
     @Override
-    protected IOperationStrategy getStrategy(Object... arg) {
+    protected ArrayList<OperationStrategy> getStrategies(Object... arg) {
         String id = (String) arg[0];
 
+        ArrayList<OperationStrategy> strategies = new ArrayList<>();
+        BaseHttpAnalyzer analyzer = new BaseHttpAnalyzer() {
+            private Device mDevice;
+            private boolean mNotFound;
+
+            @Override
+            public Boolean analyzeResult(Integer aHttpCode, String aString) {
+                switch (aHttpCode) {
+                    case HttpURLConnection.HTTP_NOT_FOUND:
+                        this.mNotFound = true;
+                        return true;
+                    case HttpURLConnection.HTTP_OK:
+                        this.mDevice = OperationHelper.getModelObject(aString, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
+                        return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void addExtrasForResultOk(Intent intent) {
+                if (mNotFound)
+                    intent.putExtra(DeleteDeviceReceiver.EXTRA_NOT_FOUND, true);
+                else
+                    intent.putExtra(DeleteDeviceReceiver.EXTRA_DEVICE, mDevice);
+            }
+        };
+
         if (mock) {
-            StrategyMock strategyMock = new StrategyMock(0f);
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-            return strategyMock;
+            StrategyHttpMock strategyMock = new StrategyHttpMock(this, analyzer, 0f);
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+            strategies.add(strategyMock);
+        } else {
+            StrategyIonSingleStringDelete strategy = new StrategyIonSingleStringDelete(this, analyzer, String.format(mUrl, id));
+            strategies.add(strategy);
         }
-
-        StrategyIonSingleStringDelete strategy = new StrategyIonSingleStringDelete(String.format(mUrl, id));
-        return strategy;
+        return strategies;
     }
 
-    @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
-        switch (aHttpCode) {
-            case HttpURLConnection.HTTP_NOT_FOUND:
-                this.mNotFound = true;
-                return true;
-            case HttpURLConnection.HTTP_OK:
-                this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected void addExtrasForResultOk(Intent intent) {
-        if (mNotFound)
-            intent.putExtra(DeleteDeviceReceiver.EXTRA_NOT_FOUND, true);
-        else
-            intent.putExtra(DeleteDeviceReceiver.EXTRA_DEVICE, mDevice);
-    }
-
-    public interface IDeleteDeviceReceiver {
-        void onNoInternet();
-
-        void onStartOperation();
-
+    public interface IDeleteDeviceReceiver extends IStrategyHttpCallback {
         void onSuccess(Device aDevice);
 
         void onError();
@@ -88,24 +85,14 @@ public class DeleteDeviceOperation extends ExampleOperation {
         void onNotFound();
     }
 
-    public static class DeleteDeviceReceiver extends OperationBroadcastReceiver {
+    public static class DeleteDeviceReceiver extends OperationHttpBroadcastReceiver {
         static final String EXTRA_NOT_FOUND = "EXTRA_NOT_FOUND";
         static final String EXTRA_DEVICE = "EXTRA_DEVICE";
         private final IDeleteDeviceReceiver mCallback;
 
         public DeleteDeviceReceiver(IDeleteDeviceReceiver callback) {
-            super();
+            super(callback);
             mCallback = callback;
-        }
-
-        @Override
-        protected void onNoInternet() {
-            mCallback.onNoInternet();
-        }
-
-        @Override
-        protected void onStartOperation() {
-            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

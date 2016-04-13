@@ -2,13 +2,16 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
+import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
+import com.globallogic.futbol.core.interfaces.callbacks.IStrategyHttpCallback;
+import com.globallogic.futbol.core.strategies.OperationStrategy;
+import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
 import com.globallogic.futbol.strategies.ion.StrategyIonConfig;
 import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringGet;
 import com.globallogic.futbol.strategies.ion.example.BuildConfig;
 import com.globallogic.futbol.strategies.ion.example.operations.helper.ExampleOperation;
+
+import java.util.ArrayList;
 
 /**
  * Created by Facundo Mengoni on 6/3/2015.
@@ -21,57 +24,47 @@ public class TimeOutOperation extends ExampleOperation {
 
     private String mUrl = "http://www.google.com:81/";
 
-    public void execute (){
-        reset();
+    public void execute() {
         performOperation();
     }
 
     @Override
-    protected IOperationStrategy getStrategy(Object... arg) {
+    protected ArrayList<OperationStrategy> getStrategies(Object... arg) {
+        ArrayList<OperationStrategy> strategies = new ArrayList<OperationStrategy>();
+        BaseHttpAnalyzer analyzer = new BaseHttpAnalyzer() {
+            @Override
+            public Boolean analyzeResult(Integer aHttpCode, String aString) {
+                return true;
+            }
+
+            @Override
+            public void addExtrasForResultOk(Intent intent) {
+            }
+        };
+
         if (mock) {
-            StrategyMock strategyMock = new StrategyMock(1.0f);
-            strategyMock.addTimeoutException();
-            return strategyMock;
+            StrategyHttpMock strategyHttpMock = new StrategyHttpMock(this, analyzer, 1.0f);
+            strategyHttpMock.addTimeoutException();
+            strategies.add(strategyHttpMock);
+        } else {
+            StrategyIonSingleStringGet strategy = new StrategyIonSingleStringGet(this, analyzer, new StrategyIonConfig(0, 10), mUrl);
+            strategies.add(strategy);
         }
-        StrategyIonSingleStringGet strategy = new StrategyIonSingleStringGet(new StrategyIonConfig(0, 10), mUrl);
-        return strategy;
+        return strategies;
     }
 
-    @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
-        return true;
-    }
-
-    @Override
-    protected void addExtrasForResultOk(Intent intent) {
-    }
-
-    public interface ITimeOutReceiver {
-        void onNoInternet();
-
-        void onStartOperation();
-
+    public interface ITimeOutReceiver extends IStrategyHttpCallback {
         void onSuccess();
 
         void onError();
     }
 
-    public static class TimeOutReceiver extends OperationBroadcastReceiver {
+    public static class TimeOutReceiver extends OperationHttpBroadcastReceiver {
         private final ITimeOutReceiver mCallback;
 
         public TimeOutReceiver(ITimeOutReceiver callback) {
-            super();
+            super(callback);
             mCallback = callback;
-        }
-
-        @Override
-        protected void onNoInternet() {
-            mCallback.onNoInternet();
-        }
-
-        @Override
-        protected void onStartOperation() {
-            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

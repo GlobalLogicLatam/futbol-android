@@ -1,5 +1,7 @@
 package com.globallogic.futbol.strategies.ion;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
 import com.koushikdutta.ion.builder.Builders;
 
 
@@ -7,23 +9,23 @@ public abstract class StrategyIonSingleString extends StrategyIonBasic {
     private static final String TAG = StrategyIonSingleString.class.getSimpleName();
     private final String mString;
 
-    public StrategyIonSingleString(String aUrl) {
-        super(aUrl);
+    public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl) {
+        super(anOperation, anAnalyzer, aUrl);
         mString = "";
     }
 
-    public StrategyIonSingleString(String aUrl, String aString) {
-        super(aUrl);
+    public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aUrl);
         this.mString = aString;
     }
 
-    public StrategyIonSingleString(StrategyIonConfig aStrategyIonConfig, String aUrl) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         mString = "";
     }
 
-    public StrategyIonSingleString(StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         this.mString = aString;
     }
 

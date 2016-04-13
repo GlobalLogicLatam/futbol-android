@@ -2,6 +2,9 @@ package com.globallogic.futbol.strategies.ion;
 
 import android.text.TextUtils;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -23,20 +26,20 @@ public class StrategyIonSingleStringGet extends StrategyIonSingleString {
 
     private final ArrayList<NameValuePair> mParams = new ArrayList<NameValuePair>();
 
-    public StrategyIonSingleStringGet(String aUrl) {
-        super(aUrl);
+    public StrategyIonSingleStringGet(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer,String aUrl) {
+        super(anOperation, anAnalyzer, aUrl);
     }
 
-    public StrategyIonSingleStringGet(String aUrl, String aString) {
-        super(aUrl, aString);
+    public StrategyIonSingleStringGet(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aUrl, aString);
     }
 
-    public StrategyIonSingleStringGet(StrategyIonConfig aStrategyIonConfig, String aUrl) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonSingleStringGet(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer,StrategyIonConfig aStrategyIonConfig, String aUrl) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
     }
 
-    public StrategyIonSingleStringGet(StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
-        super(aStrategyIonConfig, aUrl, aString);
+    public StrategyIonSingleStringGet(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer,StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl, aString);
     }
 
     protected static String formatUrl(String aUrl, ArrayList<NameValuePair> aParams) {

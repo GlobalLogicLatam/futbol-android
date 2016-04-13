@@ -51,8 +51,13 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
+        vOperationResult.setText(R.string.doing_operation);
         enableButtons(false);
+    }
+
+    @Override
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
@@ -88,15 +93,9 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
         vSubmit.setOnClickListener(this);
         vOperationResult = (TextView) rootView.findViewById(R.id.fragment_delete_example_erase_device_result);
 
-        mDeleteDeviceReceiver.register(mDeleteDeviceOperation);
+        mDeleteDeviceReceiver.startListening(mDeleteDeviceOperation);
 
         return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        updateOperationStatus();
     }
 
     @Override
@@ -124,27 +123,6 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
         }
     }
 
-    private void updateOperationStatus() {
-        switch (mDeleteDeviceOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationResult.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationResult.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationResult.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationResult.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationResult.setText("Some error");
-                break;
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -157,6 +135,6 @@ public class DeleteDeviceFragment extends Fragment implements DeleteDeviceOperat
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mDeleteDeviceReceiver.unRegister();
+        mDeleteDeviceReceiver.stopListening();
     }
 }

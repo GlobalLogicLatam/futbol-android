@@ -1,25 +1,28 @@
 package com.globallogic.futbol.strategies.ion;
 
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpPut;
 
 public class StrategyIonSingleStringPut extends StrategyIonSingleString {
     private static final String TAG = StrategyIonSingleStringPut.class.getSimpleName();
 
-    public StrategyIonSingleStringPut(String aUrl) {
-        super(aUrl);
+    public StrategyIonSingleStringPut(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl) {
+        super(anOperation, anAnalyzer, aUrl);
     }
 
-    public StrategyIonSingleStringPut(String aUrl, String aString) {
-        super(aUrl, aString);
+    public StrategyIonSingleStringPut(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aUrl, aString);
     }
 
-    public StrategyIonSingleStringPut(StrategyIonConfig aStrategyIonConfig, String aUrl) {
-        super(aStrategyIonConfig, aUrl);
+    public StrategyIonSingleStringPut(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
     }
 
-    public StrategyIonSingleStringPut(StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
-        super(aStrategyIonConfig, aUrl, aString);
+    public StrategyIonSingleStringPut(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
+        super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl, aString);
     }
 
     @Override

@@ -1,11 +1,10 @@
 package com.globallogic.futbol.strategies.ion;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.interfaces.IStrategyCallback;
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
+import com.globallogic.futbol.core.responses.StrategyHttpResponse;
+import com.globallogic.futbol.core.strategies.HttpOperationStrategy;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
@@ -16,18 +15,18 @@ import org.apache.http.HttpRequest;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class StrategyIonBasic implements Serializable, IOperationStrategy, FutureCallback<Response<String>> {
+public abstract class StrategyIonBasic extends HttpOperationStrategy implements Serializable, FutureCallback<Response<String>> {
     private static final String TAG = StrategyIonBasic.class.getSimpleName();
     private final StrategyIonConfig mConfig;
     private final String mUrl;
     private ArrayList<KeyValue> mHeaders = new ArrayList<>();
-    protected IStrategyCallback mCallback;
 
-    protected StrategyIonBasic(String aUrl) {
-        this(StrategyIonConfig.getDefaultConfig(), aUrl);
+    protected StrategyIonBasic(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl) {
+        this(anOperation, anAnalyzer, StrategyIonConfig.getDefaultConfig(), aUrl);
     }
 
-    protected StrategyIonBasic(StrategyIonConfig aStrategyIonConfig, String aUrl) {
+    protected StrategyIonBasic(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl) {
+        super(anOperation, anAnalyzer);
         this.mConfig = aStrategyIonConfig;
         this.mUrl = aUrl;
     }
@@ -41,14 +40,7 @@ public abstract class StrategyIonBasic implements Serializable, IOperationStrate
     }
 
     @Override
-    public void updateCallback(IStrategyCallback callback) {
-        this.mCallback = callback;
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void doRequest(IStrategyCallback callback) {
-        this.mCallback = callback;
+    protected void doRequestImpl() {
         Builders.Any.B b = Ion
                 .with(OperationApp.getInstance())
                 .load(getMethod(), getUrl())
@@ -67,13 +59,16 @@ public abstract class StrategyIonBasic implements Serializable, IOperationStrate
 
     @Override
     public void onCompleted(final Exception e, final Response<String> response) {
+        StrategyHttpResponse strategyResponse = new StrategyHttpResponse();
         int code = -1;
         String result = "";
         if (response != null) {
             code = response.getHeaders().code();
             result = response.getResult();
         }
-        mCallback.parseResponse(e, code, result);
+        strategyResponse.setHttpCode(code);
+        strategyResponse.setResponse(result);
+        parseResponse(e, strategyResponse);
     }
 
     @Override

@@ -53,8 +53,13 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
+        vOperationResult.setText(R.string.doing_operation);
         enableButtons(false);
+    }
+
+    @Override
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
@@ -85,15 +90,9 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
         vSubmit.setOnClickListener(this);
         vOperationResult = (TextView) rootView.findViewById(R.id.fragment_post_example_submit_device_result);
 
-        mCreateDeviceReceiver.register(mCreateDeviceOperation);
+        mCreateDeviceReceiver.startListening(mCreateDeviceOperation);
 
         return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        updateOperationStatus();
     }
 
     @Override
@@ -121,27 +120,6 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
         }
     }
 
-    private void updateOperationStatus() {
-        switch (mCreateDeviceOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationResult.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationResult.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationResult.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationResult.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationResult.setText("Some error");
-                break;
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -154,6 +132,6 @@ public class CreateDeviceFragment extends Fragment implements CreateDeviceOperat
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mCreateDeviceReceiver.unRegister();
+        mCreateDeviceReceiver.stopListening();
     }
 }

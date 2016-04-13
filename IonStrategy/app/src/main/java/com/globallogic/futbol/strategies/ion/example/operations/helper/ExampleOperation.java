@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.globallogic.futbol.core.operation.Operation;
-import com.globallogic.futbol.core.operation.OperationHelper;
+import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.operations.Operation;
+import com.globallogic.futbol.core.operations.OperationHelper;
 import com.globallogic.futbol.strategies.ion.example.R;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Facundo Mengoni on 6/3/2015.
@@ -14,7 +17,7 @@ import com.globallogic.futbol.strategies.ion.example.R;
  */
 public abstract class ExampleOperation extends Operation {
     public static final String ERROR_RESOURCE = "ERROR_RESOURCE";
-    public static final int SECONDS = 5;
+    public static final int SECONDS = 3;
     public int errorResource = R.string.no_error;
 
     public ExampleOperation() {
@@ -27,60 +30,9 @@ public abstract class ExampleOperation extends Operation {
     }
 
     private void init() {
-        // setConnectionDelay(SECONDS * 1000);
+        setConnectionDelay(TimeUnit.SECONDS.toMillis(SECONDS));
     }
 
-    @Override
-    public void reset() {
-        super.reset();
-        errorResource = R.string.no_error;
-    }
-
-    @Override
-    public void analyzeException(Exception e) {
-        OperationHelper.analyzeException(e, new OperationHelper.ExceptionCallback() {
-            @Override
-            public void jsonSyntaxException() {
-                errorResource = R.string.error_json_syntax_exception;
-            }
-
-            @Override
-            public void timeOutException() {
-                errorResource = R.string.error_time_out_exception;
-            }
-
-            @Override
-            public void socketException() {
-                errorResource = R.string.error_socket_exception;
-            }
-
-            @Override
-            public void malformedURLException() {
-                errorResource = R.string.error_malformed_url_exception;
-            }
-
-            @Override
-            public void ioException() {
-                errorResource = R.string.error_io_exception;
-            }
-
-            @Override
-            public void otherException() {
-                errorResource = R.string.error_other_exception;
-            }
-
-            @Override
-            public void unexpectedResponseException() {
-                errorResource = R.string.error_unexpected_response_exception;
-            }
-        });
-    }
-
-    @Override
-    protected void addExtrasForResultError(Intent intent) {
-    }
-
-    @Override
     public String getError(Context aContext) {
         return aContext.getString(errorResource);
     }
@@ -92,8 +44,54 @@ public abstract class ExampleOperation extends Operation {
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+    public void onRestoreSavedInstance(Bundle savedInstanceState) {
+        super.onRestoreSavedInstance(savedInstanceState);
         errorResource = savedInstanceState.getInt(ERROR_RESOURCE);
+    }
+
+    public abstract class BaseHttpAnalyzer implements IStrategyHttpAnalyzer {
+        @Override
+        public void analyzeException(Exception anException) {
+            OperationHelper.analyzeException(anException, new OperationHelper.ExceptionCallback() {
+                @Override
+                public void jsonSyntaxException() {
+                    errorResource = R.string.error_json_syntax_exception;
+                }
+
+                @Override
+                public void timeOutException() {
+                    errorResource = R.string.error_time_out_exception;
+                }
+
+                @Override
+                public void socketException() {
+                    errorResource = R.string.error_socket_exception;
+                }
+
+                @Override
+                public void malformedURLException() {
+                    errorResource = R.string.error_malformed_url_exception;
+                }
+
+                @Override
+                public void ioException() {
+                    errorResource = R.string.error_io_exception;
+                }
+
+                @Override
+                public void otherException() {
+                    errorResource = R.string.error_other_exception;
+                }
+
+                @Override
+                public void unexpectedResponseException() {
+                    errorResource = R.string.error_unexpected_response_exception;
+                }
+            });
+        }
+
+        @Override
+        public void addExtrasForResultError(Intent intent) {
+        }
     }
 }

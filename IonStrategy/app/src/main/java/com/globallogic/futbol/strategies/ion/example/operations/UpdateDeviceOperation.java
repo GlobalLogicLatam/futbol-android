@@ -2,11 +2,12 @@ package com.globallogic.futbol.strategies.ion.example.operations;
 
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
-import com.globallogic.futbol.core.operation.OperationHelper;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
+import com.globallogic.futbol.core.interfaces.callbacks.IStrategyHttpCallback;
+import com.globallogic.futbol.core.operations.OperationHelper;
+import com.globallogic.futbol.core.responses.StrategyHttpResponse;
+import com.globallogic.futbol.core.strategies.OperationStrategy;
+import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
 import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringPost;
 import com.globallogic.futbol.strategies.ion.example.BuildConfig;
 import com.globallogic.futbol.strategies.ion.example.entities.Device;
@@ -14,6 +15,7 @@ import com.globallogic.futbol.strategies.ion.example.operations.helper.ExampleOp
 import com.google.gson.JsonObject;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 /**
  * Created by Facundo Mengoni on 8/6/2015.
@@ -25,68 +27,61 @@ public class UpdateDeviceOperation extends ExampleOperation {
     private Boolean mock = false || BuildConfig.MOCK;
 
     private String mUrl = "http://172.17.201.125:1337/device/%s";
-    private Device mDevice;
-    private boolean mNotFound;
 
-    @Override
-    public void reset() {
-        super.reset();
-        mDevice = null;
-        mNotFound = false;
-    }
-
-    public void execute (String id, String name, String resolution){
-        reset();
+    public void execute(String id, String name, String resolution) {
         performOperation(id, name, resolution);
     }
 
     @Override
-    protected IOperationStrategy getStrategy(Object... arg) {
+    protected ArrayList<OperationStrategy> getStrategies(Object... arg) {
         String id = (String) arg[0];
         String name = (String) arg[1];
         String resolution = (String) arg[2];
 
+        ArrayList<OperationStrategy> strategies = new ArrayList<>();
+        BaseHttpAnalyzer analyzer = new BaseHttpAnalyzer() {
+            private Device mDevice;
+            private boolean mNotFound;
+
+            @Override
+            public Boolean analyzeResult(Integer aHttpCode, String aString) {
+                switch (aHttpCode) {
+                    case HttpURLConnection.HTTP_NOT_FOUND:
+                        this.mNotFound = true;
+                        return true;
+                    case HttpURLConnection.HTTP_OK:
+                        this.mDevice = OperationHelper.getModelObject(aString, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
+                        return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void addExtrasForResultOk(Intent intent) {
+                if (mNotFound)
+                    intent.putExtra(UpdateDeviceReceiver.EXTRA_NOT_FOUND, true);
+                else
+                    intent.putExtra(UpdateDeviceReceiver.EXTRA_DEVICE, mDevice);
+            }
+        };
+
         if (mock) {
-            StrategyMock strategyMock = new StrategyMock(0f);
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-            strategyMock.add(new StrategyMockResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"" + name + "\",\"resolution\":\"" + resolution + "\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
-            return strategyMock;
+            StrategyHttpMock strategyMock = new StrategyHttpMock(this, analyzer, 0f);
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_NOT_FOUND, ""));
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"1\",\"name\":\"S3\",\"resolution\":\"720x1280\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+            strategyMock.add(new StrategyHttpResponse(HttpURLConnection.HTTP_OK, "{\"createdAt\":\"2015-08-05T11:14:45.374Z\",\"id\":\"" + id + "\",\"name\":\"" + name + "\",\"resolution\":\"" + resolution + "\",\"updatedAt\":\"2015-08-05T11:14:45.374Z\"}"));
+            strategies.add(strategyMock);
+        } else {
+            JsonObject json = new JsonObject();
+            json.addProperty("name", name);
+            json.addProperty("resolution", resolution);
+            StrategyIonSingleStringPost strategy = new StrategyIonSingleStringPost(this, analyzer, String.format(mUrl, id), json.toString());
+            strategies.add(strategy);
         }
-
-        JsonObject json = new JsonObject();
-        json.addProperty("name", name);
-        json.addProperty("resolution", resolution);
-        StrategyIonSingleStringPost strategy = new StrategyIonSingleStringPost(String.format(mUrl, id), json.toString());
-        return strategy;
+        return strategies;
     }
 
-    @Override
-    public Boolean analyzeResult(int aHttpCode, String result) {
-        switch (aHttpCode) {
-            case HttpURLConnection.HTTP_NOT_FOUND:
-                this.mNotFound = true;
-                return true;
-            case HttpURLConnection.HTTP_OK:
-                this.mDevice = OperationHelper.getModelObject(result, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Device.class);
-                return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected void addExtrasForResultOk(Intent intent) {
-        if (mNotFound)
-            intent.putExtra(UpdateDeviceReceiver.EXTRA_NOT_FOUND, true);
-        else
-            intent.putExtra(UpdateDeviceReceiver.EXTRA_DEVICE, mDevice);
-    }
-
-    public interface IUpdateDeviceReceiver {
-        void onNoInternet();
-
-        void onStartOperation();
-
+    public interface IUpdateDeviceReceiver extends IStrategyHttpCallback {
         void onSuccess(Device aDevice);
 
         void onError();
@@ -94,24 +89,14 @@ public class UpdateDeviceOperation extends ExampleOperation {
         void onNotFound();
     }
 
-    public static class UpdateDeviceReceiver extends OperationBroadcastReceiver {
+    public static class UpdateDeviceReceiver extends OperationHttpBroadcastReceiver {
         static final String EXTRA_NOT_FOUND = "EXTRA_NOT_FOUND";
         static final String EXTRA_DEVICE = "EXTRA_DEVICE";
         private final IUpdateDeviceReceiver mCallback;
 
         public UpdateDeviceReceiver(IUpdateDeviceReceiver callback) {
-            super();
+            super(callback);
             mCallback = callback;
-        }
-
-        @Override
-        protected void onNoInternet() {
-            mCallback.onNoInternet();
-        }
-
-        @Override
-        protected void onStartOperation() {
-            mCallback.onStartOperation();
         }
 
         protected void onResultOK(Intent anIntent) {

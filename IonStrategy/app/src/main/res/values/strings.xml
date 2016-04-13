@@ -6,6 +6,8 @@
     <string name="title_section_put">Put</string>
     <string name="title_section_delete">Delete</string>
 
+    <string name="doing_operation">Ejecutando operación</string>
+
     <string name="no_internet">No hay internet</string>
     <string name="no_error">No hay error</string>
     <string name="error_json_syntax_exception">Json syntax exception</string>

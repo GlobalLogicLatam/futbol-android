@@ -55,8 +55,13 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
+        vOperationResult.setText(R.string.doing_operation);
         enableButtons(false);
+    }
+
+    @Override
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
@@ -94,15 +99,9 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
         vSubmit.setOnClickListener(this);
         vOperationResult = (TextView) rootView.findViewById(R.id.fragment_put_example_update_device_result);
 
-        mUpdateDeviceReceiver.register(mUpdateDeviceOperation);
+        mUpdateDeviceReceiver.startListening(mUpdateDeviceOperation);
 
         return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        updateOperationStatus();
     }
 
     @Override
@@ -131,27 +130,6 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
         }
     }
 
-    private void updateOperationStatus() {
-        switch (mUpdateDeviceOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationResult.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationResult.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationResult.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationResult.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationResult.setText("Some error");
-                break;
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -163,6 +141,6 @@ public class PutExampleUpdateDeviceFragment extends Fragment implements UpdateDe
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mUpdateDeviceReceiver.unRegister();
+        mUpdateDeviceReceiver.stopListening();
     }
 }

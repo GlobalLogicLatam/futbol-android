@@ -40,18 +40,21 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
+        vOperationResult.setText(R.string.doing_operation);
+    }
+
+    @Override
+    public void onFinishOperation() {
+        //Nothing to do
     }
 
     @Override
     public void onSuccess() {
-        updateOperationStatus();
         vOperationResult.setText("Success");
     }
 
     @Override
     public void onError() {
-        updateOperationStatus();
         vOperationResult.setText(mTimeOutOperation.getError(getActivity()));
     }
 
@@ -68,7 +71,7 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
         vOperationStatus = (TextView) rootView.findViewById(R.id.operation_status);
         vOperationResult = (TextView) rootView.findViewById(R.id.operation_result);
 
-        mTimeOutReceiver.register(mTimeOutOperation);
+        mTimeOutReceiver.startListening(mTimeOutOperation);
 
         return rootView;
     }
@@ -83,27 +86,6 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
         mTimeOutOperation.execute();
     }
 
-    private void updateOperationStatus() {
-        switch (mTimeOutOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationStatus.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationStatus.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationStatus.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationStatus.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationStatus.setText("Some error");
-                break;
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -116,6 +98,6 @@ public class GetExampleTimeOutFragment extends Fragment implements TimeOutOperat
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mTimeOutReceiver.unRegister();
+        mTimeOutReceiver.stopListening();
     }
 }

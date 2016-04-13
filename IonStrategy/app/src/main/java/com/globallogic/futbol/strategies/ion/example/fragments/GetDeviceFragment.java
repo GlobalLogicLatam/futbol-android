@@ -42,18 +42,21 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
 
     @Override
     public void onStartOperation() {
-        updateOperationStatus();
+        vOperationResult.setText(R.string.doing_operation);
+    }
+
+    @Override
+    public void onFinishOperation() {
+        // Nothing to do
     }
 
     @Override
     public void onSuccess(Device aDevice) {
-        updateOperationStatus();
         vOperationResult.setText(aDevice.toString());
     }
 
     @Override
     public void onError() {
-        updateOperationStatus();
         vOperationResult.setText(mGetDeviceOperation.getError(getActivity()));
     }
 
@@ -70,7 +73,7 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
         vOperationStatus = (TextView) rootView.findViewById(R.id.operation_status);
         vOperationResult = (TextView) rootView.findViewById(R.id.operation_result);
 
-        mGetDeviceReceiver.register(mGetDeviceOperation);
+        mGetDeviceReceiver.startListening(mGetDeviceOperation);
 
         return rootView;
     }
@@ -85,27 +88,6 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
         mGetDeviceOperation.execute();
     }
 
-    private void updateOperationStatus() {
-        switch (mGetDeviceOperation.getStatus()) {
-            case READY_TO_EXECUTE:
-                vOperationStatus.setText("Ready to execute");
-                break;
-            case WAITING_EXECUTION:
-                vOperationStatus.setText("Waiting execution");
-                break;
-            case DOING_EXECUTION:
-                vOperationStatus.setText("Doing execution");
-                break;
-            case FINISHED_EXECUTION:
-                vOperationStatus.setText("Finished execution");
-                break;
-            case UNKNOWN:
-            default:
-                vOperationStatus.setText("Some error");
-                break;
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -118,6 +100,6 @@ public class GetDeviceFragment extends Fragment implements GetDeviceOperation.IG
     public void onDestroy() {
         super.onDestroy();
         // Desregistro el receiver
-        mGetDeviceReceiver.unRegister();
+        mGetDeviceReceiver.stopListening();
     }
 }
