@@ -240,7 +240,7 @@ public abstract class Operation implements IOperation, Serializable {
         outState.putInt(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION, mStrategiesInExecution);
     }
 
-    private void onRestoreSavedInstance(Bundle savedInstanceState) {
+    public void onRestoreSavedInstance(Bundle savedInstanceState) {
         mStrategiesInExecution = savedInstanceState.getInt(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION);
     }
     //endregion

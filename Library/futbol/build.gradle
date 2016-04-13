@@ -1,11 +1,16 @@
 apply plugin: 'com.android.library'
 
-def getVersionCode() {
-    return hasProperty('VERSION_CODE') ? VERSION_CODE : 1
-}
+ext {
+    appVersionCode = 1
+    appVersionName = '0.3.1'
 
-def getVersionName() {
-    return hasProperty('VERSION_NAME') ? VERSION_NAME : "0.0.1"
+    appGroupId = 'com.globallogic'
+    appActifactId = 'futbol'
+
+    projectName = 'Futbol library'
+    projectPackaging = 'jar'
+    projectDecription = 'Libreria de arquitectura'
+    projectUrl = 'http://gitlab-art.globallogic.com.ar/androidarea_arg/futbol.git'
 }
 
 android {
@@ -15,8 +20,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode getVersionCode()
-        versionName getVersionName()
+        versionCode appVersionCode
+        versionName appVersionName
     }
     buildTypes {
         release {

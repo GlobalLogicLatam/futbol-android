@@ -2,6 +2,7 @@ package com.globallogic.futbol.example.domain.operations;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.operations.Operation;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
  * GlobalLogic | facundo.mengoni@globallogic.com
  */
 public abstract class BaseOperation extends Operation {
+    public static final String ERROR_RESOURCE = "ERROR_RESOURCE";
     public static final int SECONDS = 3;
     public int errorResource = R.string.no_error;
 
@@ -33,6 +35,18 @@ public abstract class BaseOperation extends Operation {
 
     public String getError(Context aContext) {
         return aContext.getString(errorResource);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ERROR_RESOURCE, errorResource);
+    }
+
+    @Override
+    public void onRestoreSavedInstance(Bundle savedInstanceState) {
+        super.onRestoreSavedInstance(savedInstanceState);
+        errorResource = savedInstanceState.getInt(ERROR_RESOURCE);
     }
 
     public abstract class BaseHttpAnalyzer implements IStrategyHttpAnalyzer {
