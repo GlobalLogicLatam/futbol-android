@@ -11,4 +11,5 @@
     <string name="malformed_url_exception">Malformed URL error</string>
     <string name="io_exception">I/O error</string>
     <string name="other_exception">Unexpected error</string>
+    <string name="unexpected_response_exception">Unexpected response error</string>
 </resources>

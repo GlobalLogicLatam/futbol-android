@@ -3,6 +3,7 @@ package com.globallogic.futbol.demo.app.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -41,7 +42,7 @@ public class DetailActivity extends ActionBarActivity implements CreateDeviceOpe
         Toolbar vToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(vToolbar);
 
-        mCreateDeviceReceiver.register(mCreateDeviceOperation);
+        mCreateDeviceReceiver.startListening(mCreateDeviceOperation);
         vName = (EditText) findViewById(R.id.activity_detail_name);
         vResolution = (EditText) findViewById(R.id.activity_detail_resolution);
         vSubmit = (Button) findViewById(R.id.activity_detail_submit);
@@ -62,13 +63,13 @@ public class DetailActivity extends ActionBarActivity implements CreateDeviceOpe
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mCreateDeviceOperation.onRestoreInstanceState(savedInstanceState);
+        mCreateDeviceOperation.onRestoreSavedInstance(savedInstanceState);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mCreateDeviceReceiver.unRegister();
+        mCreateDeviceReceiver.stopListening();
     }
 
     @Override
@@ -79,15 +80,25 @@ public class DetailActivity extends ActionBarActivity implements CreateDeviceOpe
     }
 
     @Override
+    public void onFinishOperation() {
+
+    }
+
+    @Override
     public void onSuccess(Device device) {
         Toast.makeText(this, "Se creó correctamente", Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onError() {
+    public void onError(@StringRes int resError) {
         vName.setEnabled(true);
         vResolution.setEnabled(true);
         vSubmit.setEnabled(true);
-        Toast.makeText(this, mCreateDeviceOperation.getError(this), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(resError), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onNoInternet() {
+
     }
 }

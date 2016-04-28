@@ -3,19 +3,20 @@ package com.globallogic.futbol.demo.app.operations;
 import android.content.Context;
 import android.content.Intent;
 
-import com.globallogic.futbol.core.interfaces.IOperationReceiver;
-import com.globallogic.futbol.core.interfaces.IOperationStrategy;
-import com.globallogic.futbol.core.operation.Operation;
-import com.globallogic.futbol.core.operation.OperationBroadcastReceiver;
-import com.globallogic.futbol.core.operation.OperationHelper;
-import com.globallogic.futbol.core.operation.strategies.StrategyMock;
-import com.globallogic.futbol.core.operation.strategies.StrategyMockResponse;
+import com.globallogic.futbol.core.operations.OperationHelper;
+import com.globallogic.futbol.core.responses.StrategyHttpResponse;
+import com.globallogic.futbol.core.strategies.OperationStrategy;
+import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
 import com.globallogic.futbol.demo.R;
+import com.globallogic.futbol.demo.app.analyzers.MyDefaultHttpAnalyzer;
+import com.globallogic.futbol.demo.app.interfaces.MyStrategyHttpCallback;
+import com.globallogic.futbol.demo.app.receivers.MyReceiver;
 import com.globallogic.futbol.demo.domain.Device;
 import com.globallogic.futbol.strategies.ion.StrategyIonSingleStringPost;
 import com.google.gson.JsonObject;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 /**
  * Created by Facundo Mengoni.
@@ -24,64 +25,58 @@ import java.net.HttpURLConnection;
 public class CreateDeviceOperation extends MyOperation {
     private final String URL = "http://172.17.201.125:1337/device/";
 
-    private Device mDevice;
     private boolean mock = false;
 
     @Override
-    public void reset() {
-        super.reset();
-        mDevice = null;
-    }
-
-    @Override
-    protected IOperationStrategy getStrategy(Object... args) {
+    protected ArrayList<OperationStrategy> getStrategies(Object... args) {
         String name = (String) args[0];
         String resolution = (String) args[1];
+        ArrayList<OperationStrategy> strategies = new ArrayList<>();
+        MyDefaultHttpAnalyzer analyzer = new MyDefaultHttpAnalyzer() {
+            private Device mDevice;
+
+            @Override
+            public Boolean analyzeResult(Integer aHttpCode, String aString) {
+                switch (aHttpCode) {
+                    case HttpURLConnection.HTTP_CREATED:
+                    case HttpURLConnection.HTTP_OK:
+                        this.mDevice = OperationHelper.getModelObject(aString, Device.class);
+                        return true;
+                    case HttpURLConnection.HTTP_BAD_REQUEST:
+                        this.mError = R.string.bad_request;
+                        return true;
+                    case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                        this.mError = R.string.internal_error;
+                        return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void addExtrasForResultOk(Intent intent) {
+                intent.putExtra(CreateDeviceReceiver.DEVICE, mDevice);
+            }
+        };
 
         if (mock) {
-            StrategyMock strategy = new StrategyMock(0f);
-            strategy.add(new StrategyMockResponse(200, "{\"id\":1,\"name\":\"" + name + "\",\"resolution\":\"" + resolution + "\",\"createdAt\":\"2015-08-06T13:19:39.000Z\",\"updatedAt\":\"2015-08-06T13:21:03.000Z\"}"));
-            return strategy;
+            StrategyHttpMock strategy = new StrategyHttpMock(this, analyzer, 0f);
+            strategy.add(new StrategyHttpResponse(200, "{\"id\":1,\"name\":\"" + name + "\",\"resolution\":\"" + resolution + "\",\"createdAt\":\"2015-08-06T13:19:39.000Z\",\"updatedAt\":\"2015-08-06T13:21:03.000Z\"}"));
+            strategies.add(strategy);
+        } else {
+            JsonObject json = new JsonObject();
+            json.addProperty("name", name);
+            json.addProperty("resolution", resolution);
+            StrategyIonSingleStringPost strategy = new StrategyIonSingleStringPost(this, analyzer, URL, json.toString());
+            strategies.add(strategy);
         }
-
-        JsonObject json = new JsonObject();
-        json.addProperty("name", name);
-        json.addProperty("resolution", resolution);
-        StrategyIonSingleStringPost strategy = new StrategyIonSingleStringPost(URL, json.toString());
-        return strategy;
+        return strategies;
     }
 
-    @Override
-    public void analyzeResult(int httpCode, String result) {
-        switch (httpCode) {
-            case HttpURLConnection.HTTP_CREATED:
-            case HttpURLConnection.HTTP_OK:
-                this.mDevice = OperationHelper.getModelObject(result, Device.class);
-                break;
-            case HttpURLConnection.HTTP_BAD_REQUEST:
-                this.mError = R.string.bad_request;
-                break;
-            case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                this.mError = R.string.internal_error;
-                break;
-            default:
-                this.mError = R.string.other_exception;
-                break;
-        }
-    }
-
-    @Override
-    protected void addExtrasForResultOk(Intent intent) {
-        intent.putExtra(CreateDeviceReceiver.DEVICE, mDevice);
-    }
-
-    public interface ICreateDeviceOperation extends IOperationReceiver {
+    public interface ICreateDeviceOperation extends MyStrategyHttpCallback {
         void onSuccess(Device device);
-
-        void onError();
     }
 
-    public static class CreateDeviceReceiver extends OperationBroadcastReceiver {
+    public static class CreateDeviceReceiver extends MyReceiver {
         public static final String DEVICE = "DEVICE";
 
         private final ICreateDeviceOperation mCallback;
@@ -97,12 +92,7 @@ public class CreateDeviceOperation extends MyOperation {
             if (device != null)
                 mCallback.onSuccess(device);
             else
-                mCallback.onError();
-        }
-
-        @Override
-        protected void onResultError(Intent intent) {
-            mCallback.onError();
+                onResultError(intent);
         }
     }
 }

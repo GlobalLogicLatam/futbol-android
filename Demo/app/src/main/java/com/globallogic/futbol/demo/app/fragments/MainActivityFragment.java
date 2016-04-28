@@ -2,6 +2,7 @@ package com.globallogic.futbol.demo.app.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,17 +37,28 @@ public class MainActivityFragment extends Fragment implements GetDevicesOperatio
         mGetDevicesReceiver = new GetDevicesOperation.GetDevicesReceiver(this);
         mCreateDeviceReceiver = new CreateDeviceOperation.CreateDeviceReceiver(new CreateDeviceOperation.ICreateDeviceOperation() {
             @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onError(@StringRes int resError) {
+
+            }
+
+            @Override
             public void onSuccess(Device device) {
                 mAdapter.addItem(device);
             }
 
+
             @Override
-            public void onError() {
+            public void onStartOperation() {
 
             }
 
             @Override
-            public void onStartOperation() {
+            public void onFinishOperation() {
 
             }
         });
@@ -61,8 +73,8 @@ public class MainActivityFragment extends Fragment implements GetDevicesOperatio
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mGetDevicesReceiver.register(mGetDevicesOperation); // <-- Don't forgot register the receiver
-        mCreateDeviceReceiver.register(CreateDeviceOperation.class);
+        mGetDevicesReceiver.startListening(mGetDevicesOperation); // <-- Don't forgot register the receiver
+        mCreateDeviceReceiver.startListening(CreateDeviceOperation.class);
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         vWaitingSwitcher = (ViewSwitcher) view.findViewById(R.id.device_list_waiting);
 
@@ -96,7 +108,7 @@ public class MainActivityFragment extends Fragment implements GetDevicesOperatio
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mGetDevicesReceiver.unRegister(); // <-- Don't forgot unregister the receiver
+        mGetDevicesReceiver.stopListening(); // <-- Don't forgot unregister the receiver
     }
 
     public void showWaiting(boolean show) {
@@ -116,13 +128,23 @@ public class MainActivityFragment extends Fragment implements GetDevicesOperatio
     }
 
     @Override
+    public void onFinishOperation() {
+
+    }
+
+    @Override
     public void onSuccess(ArrayList<Device> devices) {
         showWaiting(false);
         mAdapter.addItems(devices);
     }
 
     @Override
-    public void onError() {
+    public void onError(int resError) {
         showWaiting(false);
+    }
+
+    @Override
+    public void onNoInternet() {
+
     }
 }
