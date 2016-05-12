@@ -21,6 +21,6 @@ public abstract class MyReceiver extends OperationBroadcastReceiver {
 
     @Override
     protected void onResultError(Intent intent) {
-        mCallback.onError(intent.getIntExtra(ERROR, R.string.empty_error));
+        mCallback.onError(intent.getIntExtra(ERROR, R.string.unexpected_response_exception));
     }
 }

@@ -2,13 +2,13 @@ apply plugin: 'com.android.library'
 
 ext {
     appVersionCode = 1
-    appVersionName = '0.3.1'
+    appVersionName = '0.3.2'
 
     appGroupId = 'com.globallogic'
     appActifactId = 'futbol'
 
     projectName = 'Futbol library'
-    projectPackaging = 'jar'
+    projectPackaging = 'aar'
     projectDecription = 'Libreria de arquitectura'
     projectUrl = 'http://gitlab-art.globallogic.com.ar/androidarea_arg/futbol.git'
 }
@@ -18,7 +18,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 8
         targetSdkVersion 23
         versionCode appVersionCode
         versionName appVersionName
@@ -37,7 +37,7 @@ dependencies {
 }
 
 // for AAR package
-// apply from: 'glRespositoryAAR.gradle'
+apply from: 'glRespositoryAAR.gradle'
 
 // or JAR package
-apply from: 'glRespositoryJAR.gradle'
+// apply from: 'glRespositoryJAR.gradle'

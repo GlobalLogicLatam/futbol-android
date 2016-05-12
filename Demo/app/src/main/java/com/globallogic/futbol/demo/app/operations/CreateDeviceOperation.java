@@ -1,6 +1,5 @@
 package com.globallogic.futbol.demo.app.operations;
 
-import android.content.Context;
 import android.content.Intent;
 
 import com.globallogic.futbol.core.operations.OperationHelper;
