@@ -8,7 +8,7 @@ import java.io.File;
 
 public abstract class StrategyIonSingleFile extends StrategyIonBasic {
     private static final String TAG = StrategyIonSingleFile.class.getSimpleName();
-    private final File mFile;
+    private File mFile;
 
     public StrategyIonSingleFile(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, File mFile) {
         super(anOperation, anAnalyzer, aUrl);
@@ -18,6 +18,14 @@ public abstract class StrategyIonSingleFile extends StrategyIonBasic {
     public StrategyIonSingleFile(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, File mFile) {
         super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         this.mFile = mFile;
+    }
+
+    public File getFile() {
+        return mFile;
+    }
+
+    public void setFile(File aFile) {
+        this.mFile = aFile;
     }
 
     @Override

@@ -7,31 +7,39 @@ import com.koushikdutta.ion.builder.Builders;
 
 public abstract class StrategyIonSingleString extends StrategyIonBasic {
     private static final String TAG = StrategyIonSingleString.class.getSimpleName();
-    private final String mString;
+    private String mBody;
 
     public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl) {
         super(anOperation, anAnalyzer, aUrl);
-        mString = "";
+        mBody = "";
     }
 
     public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, String aString) {
         super(anOperation, anAnalyzer, aUrl);
-        this.mString = aString;
+        this.mBody = aString;
     }
 
     public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl) {
         super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
-        mString = "";
+        mBody = "";
     }
 
     public StrategyIonSingleString(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, String aString) {
         super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
-        this.mString = aString;
+        this.mBody = aString;
+    }
+
+    public String getBody() {
+        return mBody;
+    }
+
+    public void setBody(String aBody) {
+        this.mBody = aBody;
     }
 
     @Override
     protected void getResponse(Builders.Any.B b) {
-        b.setStringBody(mString).asString().withResponse().setCallback(this);
+        b.setStringBody(mBody).asString().withResponse().setCallback(this);
     }
 
     @Override
@@ -42,7 +50,7 @@ public abstract class StrategyIonSingleString extends StrategyIonBasic {
 
         StrategyIonSingleString that = (StrategyIonSingleString) o;
 
-        if (mString != null ? !mString.equals(that.mString) : that.mString != null) return false;
+        if (mBody != null ? !mBody.equals(that.mBody) : that.mBody != null) return false;
 
         return true;
     }
@@ -50,14 +58,14 @@ public abstract class StrategyIonSingleString extends StrategyIonBasic {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (mString != null ? mString.hashCode() : 0);
+        result = 31 * result + (mBody != null ? mBody.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "StrategyIonSingleString{" +
-                "mString='" + mString + '\'' +
+                "mBody='" + mBody + '\'' +
                 '}';
     }
 }

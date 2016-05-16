@@ -35,6 +35,10 @@ public abstract class StrategyIonBasic extends HttpOperationStrategy implements 
         return this.mUrl;
     }
 
+    public ArrayList<KeyValue> getHeaders() {
+        return mHeaders;
+    }
+
     public void addHeader(KeyValue valuePair) {
         mHeaders.add(valuePair);
     }

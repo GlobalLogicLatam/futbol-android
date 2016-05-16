@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public abstract class StrategyIonMultipart extends StrategyIonBasic {
     private static final String TAG = StrategyIonMultipart.class.getSimpleName();
-    private final ArrayList<Part> mArrayList;
+    private ArrayList<Part> mArrayList;
 
     public StrategyIonMultipart(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl, ArrayList<Part> mArrayList) {
         super(anOperation, anAnalyzer, aUrl);
@@ -19,6 +19,14 @@ public abstract class StrategyIonMultipart extends StrategyIonBasic {
     public StrategyIonMultipart(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, StrategyIonConfig aStrategyIonConfig, String aUrl, ArrayList<Part> mArrayList) {
         super(anOperation, anAnalyzer, aStrategyIonConfig, aUrl);
         this.mArrayList = mArrayList;
+    }
+
+    public ArrayList<Part> getArrayList() {
+        return mArrayList;
+    }
+
+    public void setArrayList(ArrayList<Part> anArrayList) {
+        this.mArrayList = anArrayList;
     }
 
     @Override
