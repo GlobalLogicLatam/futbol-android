@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 ext {
     appVersionCode = 1
-    appVersionName = '0.3.2'
+    appVersionName = '0.3.3'
 
     appGroupId = 'com.globallogic.futbol.strategies'
     appActifactId = 'ion'
