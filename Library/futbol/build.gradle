@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 ext {
     appVersionCode = 1
-    appVersionName = '0.3.2'
+    appVersionName = '0.3.3'
 
     appGroupId = 'com.globallogic'
     appActifactId = 'futbol'
