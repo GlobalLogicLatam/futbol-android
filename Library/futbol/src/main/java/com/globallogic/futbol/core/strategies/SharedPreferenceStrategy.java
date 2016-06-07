@@ -1,13 +1,17 @@
 package com.globallogic.futbol.core.strategies;
 
 import android.annotation.TargetApi;
-import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.globallogic.futbol.core.exceptions.KeyNotFound;
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.interfaces.analyzers.IStrategySharedPreferenceAnalyzer;
 import com.globallogic.futbol.core.interfaces.parsers.IOperationParser;
+import com.globallogic.futbol.core.interfaces.repository.FloatRepository;
+import com.globallogic.futbol.core.interfaces.repository.IntegerRepository;
+import com.globallogic.futbol.core.interfaces.repository.LongRepository;
+import com.globallogic.futbol.core.interfaces.repository.StringRepository;
+import com.globallogic.futbol.core.interfaces.repository.StringSetRepository;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategySharedPreferenceResponse;
 import com.globallogic.futbol.core.utils.Utils;
@@ -23,19 +27,64 @@ import java.util.logging.Level;
  * @see IOperationParser
  * @see StrategySharedPreferenceResponse
  * @see IStrategySharedPreferenceAnalyzer
- * @since 0.3.3
+ * @see FloatRepository
+ * @see IntegerRepository
+ * @see LongRepository
+ * @see StringRepository
+ * @see StringSetRepository
+ * @since 0.3.4
  */
-public abstract class SharePreferenceStrategy<T> extends OperationStrategy<StrategySharedPreferenceResponse> implements IOperationParser<StrategySharedPreferenceResponse> {
-    private final SharedPreferences mSharedPreference;
-    private final Type mType;
-    private final String mKey;
+public abstract class SharedPreferenceStrategy<T> extends OperationStrategy<StrategySharedPreferenceResponse> implements IOperationParser<StrategySharedPreferenceResponse> {
+    private final FloatRepository mFloatRepository;
+    private final IntegerRepository mIntegerRepository;
+    private final LongRepository mLongRepository;
+    private final StringRepository mStringRepository;
+    private final StringSetRepository mStringSetRepository;
 
     //region Constructors implementation
-    public SharePreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, SharedPreferences aSharedPreference, Type aType, String aKey) {
+    public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, FloatRepository repository) {
         super(anOperation, anAnalyzer);
-        this.mSharedPreference = aSharedPreference;
-        this.mType = aType;
-        this.mKey = aKey;
+        this.mFloatRepository = repository;
+        this.mIntegerRepository = null;
+        this.mLongRepository = null;
+        this.mStringRepository = null;
+        this.mStringSetRepository = null;
+    }
+
+    public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, IntegerRepository repository) {
+        super(anOperation, anAnalyzer);
+        this.mFloatRepository = null;
+        this.mIntegerRepository = repository;
+        this.mLongRepository = null;
+        this.mStringRepository = null;
+        this.mStringSetRepository = null;
+    }
+
+    public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, LongRepository repository) {
+        super(anOperation, anAnalyzer);
+        this.mFloatRepository = null;
+        this.mIntegerRepository = null;
+        this.mLongRepository = repository;
+        this.mStringRepository = null;
+        this.mStringSetRepository = null;
+    }
+
+    public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, StringRepository repository) {
+        super(anOperation, anAnalyzer);
+        this.mFloatRepository = null;
+        this.mIntegerRepository = null;
+        this.mLongRepository = null;
+        this.mStringRepository = repository;
+        this.mStringSetRepository = null;
+    }
+
+    public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, StringSetRepository repository) {
+        super(anOperation, anAnalyzer);
+        this.mFloatRepository = null;
+        this.mIntegerRepository = null;
+        this.mLongRepository = null;
+        this.mStringRepository = null;
+        this.mStringSetRepository = repository;
     }
     //endregion
 
@@ -43,40 +92,23 @@ public abstract class SharePreferenceStrategy<T> extends OperationStrategy<Strat
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void doRequestImpl() {
-        if (mType == null) {
-            parseResponse(new Exception("An error occurs with the type of the shared preference"), null);
-        } else {
-            if (mSharedPreference.contains(mKey)) {
-                switch (mType) {
-                    case BOOLEAN:
-                        parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getBoolean(mKey, false)));
-                        break;
-                    case FLOAT:
-                        parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getFloat(mKey, 0)));
-                        break;
-                    case INT:
-                        parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getInt(mKey, 0)));
-                        break;
-                    case LONG:
-                        parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getLong(mKey, 0)));
-                        break;
-                    case STRING:
-                        parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getString(mKey, null)));
-                        break;
-                    case STRING_SET:
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            parseResponse(null, new StrategySharedPreferenceResponse(mSharedPreference.getStringSet(mKey, null)));
-                        } else {
-                            parseResponse(new Exception("SDK not supported"), null);
-                        }
-                        break;
-                    default:
-                        parseResponse(new Exception("An error occurs with the type of the shared preference"), null);
-                        break;
-                }
+        KeyNotFound keyNotFound = new KeyNotFound("The key doesn't exists");
+        if (mFloatRepository != null) {
+            parseResponse(!mFloatRepository.hasKey() ? keyNotFound : null, new StrategySharedPreferenceResponse(mFloatRepository.getFloat()));
+        } else if (mIntegerRepository != null) {
+            parseResponse(!mIntegerRepository.hasKey() ? keyNotFound : null, new StrategySharedPreferenceResponse(mIntegerRepository.getInteger()));
+        } else if (mLongRepository != null) {
+            parseResponse(!mLongRepository.hasKey() ? keyNotFound : null, new StrategySharedPreferenceResponse(mLongRepository.getLong()));
+        } else if (mStringRepository != null) {
+            parseResponse(!mStringRepository.hasKey() ? keyNotFound : null, new StrategySharedPreferenceResponse(mStringRepository.getString()));
+        } else if (mStringSetRepository != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                parseResponse(!mStringSetRepository.hasKey() ? keyNotFound : null, new StrategySharedPreferenceResponse(mStringSetRepository.getStringSet()));
             } else {
-                parseResponse(new KeyNotFound("The key doesn't exists"), null);
+                parseResponse(new Exception("SDK not supported"), null);
             }
+        } else {
+            parseResponse(new Exception("An error occurs with the repository of the shared preference"), null);
         }
     }
 
@@ -173,8 +205,4 @@ public abstract class SharePreferenceStrategy<T> extends OperationStrategy<Strat
         }
     }
     //endregion
-
-    public static enum Type {
-        BOOLEAN, FLOAT, INT, LONG, STRING, STRING_SET
-    }
 }
