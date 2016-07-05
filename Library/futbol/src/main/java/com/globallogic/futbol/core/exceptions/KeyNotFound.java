@@ -7,6 +7,9 @@ package com.globallogic.futbol.core.exceptions;
  * @since 0.3.3
  */
 public class KeyNotFound extends Exception {
+    public KeyNotFound() {
+    }
+
     public KeyNotFound(String message) {
         super(message);
     }

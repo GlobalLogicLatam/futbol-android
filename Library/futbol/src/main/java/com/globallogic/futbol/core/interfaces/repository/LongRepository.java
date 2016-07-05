@@ -6,9 +6,7 @@ package com.globallogic.futbol.core.interfaces.repository;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public interface LongRepository {
-    Boolean hasKey();
-
+public interface LongRepository extends SharedPreferenceRepository {
     Long getLong();
 
     void putLong(long value);

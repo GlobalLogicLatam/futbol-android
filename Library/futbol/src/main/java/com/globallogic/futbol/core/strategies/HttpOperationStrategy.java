@@ -1,6 +1,8 @@
 package com.globallogic.futbol.core.strategies;
 
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.globallogic.futbol.core.LocalBroadcastManager;
@@ -14,7 +16,6 @@ import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategyHttpResponse;
 import com.globallogic.futbol.core.utils.Utils;
 
-import java.util.Calendar;
 import java.util.logging.Level;
 
 /**
@@ -59,20 +60,6 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
     //endregion
 
     //region HttpOperationStrategy implementation
-
-    /**
-     * Send the broadcast to notify that the operation finished
-     *
-     * @param aResult Boolean that notify the result of the operation
-     */
-    private void afterWorkInBackgroundBroadcasts(Boolean aResult) {
-        if (aResult) {
-            sendBroadcastForOk();
-        } else {
-            sendBroadcastForError();
-        }
-    }
-
     private void sendBroadcastForNoInternet() {
         mLogger.info("Sending broadcast for no internet");
         Intent intent = new Intent();
@@ -96,23 +83,40 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
      * {@inheritDoc}
      */
     @Override
-    public void parseResponse(Exception anException, StrategyHttpResponse aStrategyResponse) {
-        Utils.thisMethodShouldNotExecuteInTheThreadUI();
-        String aString = "";
-        Integer aHttpCode = 0;
-        if (aStrategyResponse != null) {
-            aString = aStrategyResponse.getResponse();
-            aHttpCode = aStrategyResponse.getHttpCode();
-        }
-        if (anException != null)
-            mLogger.log(Level.SEVERE, String.format("Parsing response: %s", anException.getMessage()), anException);
-        if (TextUtils.isEmpty(aString) || !(aString.startsWith("{") || aString.startsWith("[")))
-            mLogger.severe(String.format("Parsing response: %s", aString));
-        else
-            mLogger.info(String.format("Parsing response: %s", aString));
+    public void parseResponse(final Exception anException, final StrategyHttpResponse aStrategyResponse) {
+        AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
+            String aString = "";
+            Integer aHttpCode = 0;
 
-        boolean result = workInBackground(anException, aHttpCode, aString);
-        afterWorkInBackground(result);
+            @Override
+            protected void onPreExecute() {
+                if (aStrategyResponse != null) {
+                    aString = aStrategyResponse.getResponse();
+                    aHttpCode = aStrategyResponse.getHttpCode();
+                }
+                if (anException != null)
+                    mLogger.log(Level.SEVERE, String.format("Parsing response: %s", anException.getMessage()), anException);
+                if (TextUtils.isEmpty(aString) || !(aString.startsWith("{") || aString.startsWith("[")))
+                    mLogger.severe(String.format("Parsing response: %s", aString));
+                else
+                    mLogger.info(String.format("Parsing response: %s", aString));
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return workInBackground(anException, aHttpCode, aString);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                afterWorkInBackground(result);
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ((Void) null));
+        } else {
+            task.execute();
+        }
     }
 
     /**
@@ -135,19 +139,6 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
             }
             return true;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void afterWorkInBackground(Boolean aResult) {
-        mLogger.info("After work in background");
-        if (timeInit != null) {
-            long timeFinish = Calendar.getInstance().getTimeInMillis();
-            long difference = timeFinish - timeInit;
-            onStrategyFinish(difference);
-        }
-        afterWorkInBackgroundBroadcasts(aResult);
     }
     //endregion
 }

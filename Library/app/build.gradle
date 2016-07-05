@@ -37,6 +37,5 @@ dependencies {
     //region Robolectric
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:1.+'
-    testCompile 'org.robolectric:robolectric:3.1-SNAPSHOT'
     //endregion
 }

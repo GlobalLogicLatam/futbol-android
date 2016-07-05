@@ -8,9 +8,7 @@ import java.util.Set;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public interface StringSetRepository {
-    Boolean hasKey();
-
+public interface StringSetRepository extends SharedPreferenceRepository {
     Set<String> getStringSet();
 
     void putStringSet(Set<String> value);

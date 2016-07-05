@@ -1,13 +1,14 @@
 package com.globallogic.futbol.core.strategies;
 
+import android.os.AsyncTask;
+import android.os.Build;
+
 import com.globallogic.futbol.core.exceptions.UnexpectedResponseException;
 import com.globallogic.futbol.core.interfaces.analyzers.IStrategyDbAnalyzer;
 import com.globallogic.futbol.core.interfaces.parsers.IOperationDbParser;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategyDbResponse;
-import com.globallogic.futbol.core.utils.Utils;
 
-import java.util.Calendar;
 import java.util.logging.Level;
 
 /**
@@ -39,36 +40,38 @@ public abstract class DbOperationStrategy<T> extends OperationStrategy<StrategyD
     }
     //endregion
 
-    //region DbOperationStrategy implementation
-
-    /**
-     * Send the broadcast to notify that the operation finished
-     *
-     * @param aResult Boolean that notify the result of the operation
-     */
-    private void afterWorkInBackgroundBroadcasts(Boolean aResult) {
-        if (aResult) {
-            sendBroadcastForOk();
-        } else {
-            sendBroadcastForError();
-        }
-    }
-    //endregion
-
     //region IOperationDbParser implementation
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void parseResponse(Exception anException, StrategyDbResponse<T> aStrategyResponse) {
-        Utils.thisMethodShouldNotExecuteInTheThreadUI();
-        T aResponse = null;
-        if (aStrategyResponse != null) {
-            aResponse = aStrategyResponse.getResponse();
+    public void parseResponse(final Exception anException, final StrategyDbResponse<T> aStrategyResponse) {
+        AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
+            T aResponse = null;
+
+            @Override
+            protected void onPreExecute() {
+                if (aStrategyResponse != null) {
+                    aResponse = aStrategyResponse.getResponse();
+                }
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return workInBackground(anException, aResponse);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                afterWorkInBackground(result);
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ((Void) null));
+        } else {
+            task.execute();
         }
-        boolean result = workInBackground(anException, aResponse);
-        afterWorkInBackground(result);
     }
 
     /**
@@ -91,19 +94,6 @@ public abstract class DbOperationStrategy<T> extends OperationStrategy<StrategyD
             }
             return true;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void afterWorkInBackground(Boolean aResult) {
-        mLogger.info("After work in background");
-        if (timeInit != null) {
-            long timeFinish = Calendar.getInstance().getTimeInMillis();
-            long difference = timeFinish - timeInit;
-            onStrategyFinish(difference);
-        }
-        afterWorkInBackgroundBroadcasts(aResult);
     }
     //endregion
 }

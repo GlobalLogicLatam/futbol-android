@@ -6,9 +6,7 @@ package com.globallogic.futbol.core.interfaces.repository;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public interface StringRepository {
-    Boolean hasKey();
-
+public interface StringRepository extends SharedPreferenceRepository {
     String getString();
 
     void putString(String value);

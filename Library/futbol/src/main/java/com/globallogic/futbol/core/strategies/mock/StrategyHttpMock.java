@@ -41,27 +41,21 @@ public class StrategyHttpMock extends HttpOperationStrategy {
      */
     @Override
     public void doRequestImpl() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (random.nextFloat() < mErrorProbability) {
-                    // Ejecuto un error
-                    Exception mockException = getMockException();
-                    if (mockException != null)
-                        parseResponse(mockException, null);
-                    else
-                        onNotResponseAdded();
-                } else {
-                    // Retorno alguna respuesta dummy
-                    StrategyHttpResponse mockResponse = getMockResponse();
-                    if (mockResponse != null)
-                        parseResponse(null, mockResponse);
-                    else
-                        onNotResponseAdded();
-                }
-            }
-        }, 100);
+        if (random.nextFloat() < mErrorProbability) {
+            // Ejecuto un error
+            Exception mockException = getMockException();
+            if (mockException != null)
+                parseResponse(mockException, null);
+            else
+                onNotResponseAdded();
+        } else {
+            // Retorno alguna respuesta dummy
+            StrategyHttpResponse mockResponse = getMockResponse();
+            if (mockResponse != null)
+                parseResponse(null, mockResponse);
+            else
+                onNotResponseAdded();
+        }
     }
 
     /**

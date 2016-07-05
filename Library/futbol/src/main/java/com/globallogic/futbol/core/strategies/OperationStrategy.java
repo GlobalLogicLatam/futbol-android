@@ -2,6 +2,7 @@ package com.globallogic.futbol.core.strategies;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 
 import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
@@ -27,20 +28,19 @@ import java.util.logging.Logger;
  * @since 0.1.0
  */
 public abstract class OperationStrategy<T extends StrategyResponse> implements IStrategy, IOperationParser<T>, Serializable {
+    //region Variables
+    final protected Operation mOperation;
     //region Logger
     public Logger mLogger;
+    //endregion
+    protected Long timeInit;
+    protected Long mConnectionDelay = 0l;
+    private IStrategyAnalyzer mAnalyzer;
 
     {
         mLogger = Logger.getLogger(getClass().getSimpleName());
         mLogger.setLevel(Level.OFF);
     }
-    //endregion
-
-    //region Variables
-    final protected Operation mOperation;
-    protected Long timeInit;
-    protected Long mConnectionDelay = 0l;
-    private IStrategyAnalyzer mAnalyzer;
     //endregion
 
     //region Constructors implementation
@@ -92,7 +92,7 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
         if (mConnectionDelay > 0) {
             simulateWaiting();
         } else {
-            doRequestImpl();
+            doRequestImplInBackground();
         }
     }
 
@@ -163,9 +163,24 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 mLogger.info("Finished simulating waiting");
-                doRequestImpl();
+                doRequestImplInBackground();
             }
         }.execute((Void) null);
+    }
+
+    protected void doRequestImplInBackground() {
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                doRequestImpl();
+                return null;
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ((Void) null));
+        } else {
+            task.execute();
+        }
     }
 
     /**
@@ -174,6 +189,29 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
      * @see #parseResponse(Exception, StrategyResponse)
      */
     protected abstract void doRequestImpl();
+
+    /**
+     * Send the broadcast to notify that the operation finished
+     *
+     * @param aResult Boolean that notify the result of the operation
+     */
+    protected void afterWorkInBackgroundBroadcasts(Boolean aResult) {
+        if (aResult) {
+            sendBroadcastForOk();
+        } else {
+            sendBroadcastForError();
+        }
+    }
+
+    public void afterWorkInBackground(Boolean aResult) {
+        mLogger.info("After work in background");
+        afterWorkInBackgroundBroadcasts(aResult);
+        if (timeInit != null) {
+            long timeFinish = Calendar.getInstance().getTimeInMillis();
+            long difference = timeFinish - timeInit;
+            onStrategyFinish(difference);
+        }
+    }
 
     /**
      * Called when the strategy is finished but before the receiver is notified.

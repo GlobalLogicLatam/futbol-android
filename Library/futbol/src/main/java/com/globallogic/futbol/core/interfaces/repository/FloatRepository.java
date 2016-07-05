@@ -6,9 +6,7 @@ package com.globallogic.futbol.core.interfaces.repository;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public interface FloatRepository {
-    Boolean hasKey();
-
+public interface FloatRepository extends SharedPreferenceRepository {
     Float getFloat();
 
     void putFloat(float value);

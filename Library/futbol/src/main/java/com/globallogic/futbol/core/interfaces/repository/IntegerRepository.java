@@ -6,9 +6,7 @@ package com.globallogic.futbol.core.interfaces.repository;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public interface IntegerRepository {
-    Boolean hasKey();
-
+public interface IntegerRepository extends SharedPreferenceRepository {
     Integer getInteger();
 
     void putInteger(int value);

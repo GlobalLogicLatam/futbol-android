@@ -1,3 +1,25 @@
+def getVersionName = { ->
+    def os = System.getProperty("os.name").toLowerCase()
+    def revision = new ByteArrayOutputStream()
+    if (!os.contains("windows")) {
+        exec {
+            executable "/bin/sh"
+            args "-c", "echo -n `git rev-list HEAD | wc -l | sed 's/^[ ^t]*//'`"
+            standardOutput = revision;
+        }
+    } else {
+        exec {
+            executable "cmd"
+            args "/c", "git rev-list HEAD | find /c /v \"\""
+            standardOutput = revision;
+        }
+        revision = revision as String
+        revision = revision.trim()
+    }
+
+    return revision
+}
+
 buildscript {
     repositories {
         jcenter()
@@ -6,7 +28,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.2'
     }
 }
 
@@ -27,4 +49,5 @@ ext {
                     email: "facundo.mengoni@globallogic.com"
             ]
     ]
+    androidVersionName = '0.3.6.' + getVersionName()
 }

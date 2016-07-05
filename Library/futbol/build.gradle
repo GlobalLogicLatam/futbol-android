@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 ext {
     appVersionCode = 1
-    appVersionName = '0.3.4'
+    appVersionName = rootProject.ext.androidVersionName
 
     appGroupId = 'com.globallogic'
     appActifactId = 'futbol'
@@ -33,7 +33,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.google.code.gson:gson:2.3.+'
+    compile 'com.google.code.gson:gson:2.4'
 }
 
 // for AAR package
