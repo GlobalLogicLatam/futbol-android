@@ -27,6 +27,7 @@ public class StrategyDbMock<T> extends DbOperationStrategy<T> {
     protected final ArrayList<Exception> responsesException = new ArrayList<>();
     private final Float mErrorProbability;
     private Random random = new Random();
+    private boolean wasCanceled;
 
     /**
      * A StrategyDbMock allows to simulate any response that the database can return.
@@ -44,21 +45,28 @@ public class StrategyDbMock<T> extends DbOperationStrategy<T> {
      */
     @Override
     public void doRequestImpl() {
-        if (random.nextFloat() < mErrorProbability) {
-            // Ejecuto un error
-            Exception mockException = getMockException();
-            if (mockException != null)
-                parseResponse(mockException, null);
-            else
-                onNotResponseAdded();
-        } else {
-            // Retorno alguna respuesta dummy
-            StrategyDbResponse<T> mockResponse = getMockResponse();
-            if (mockResponse != null)
-                parseResponse(null, mockResponse);
-            else
-                onNotResponseAdded();
+        if (!wasCanceled) {
+            if (random.nextFloat() < mErrorProbability) {
+                // Ejecuto un error
+                Exception mockException = getMockException();
+                if (mockException != null)
+                    parseResponse(mockException, null);
+                else
+                    onNotResponseAdded();
+            } else {
+                // Retorno alguna respuesta dummy
+                StrategyDbResponse<T> mockResponse = getMockResponse();
+                if (mockResponse != null)
+                    parseResponse(null, mockResponse);
+                else
+                    onNotResponseAdded();
+            }
         }
+    }
+
+    @Override
+    public void cancel() {
+        wasCanceled = true;
     }
 
     /**

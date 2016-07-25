@@ -5,6 +5,7 @@ import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.operations.Operation;
 import com.globallogic.futbol.core.responses.StrategyHttpResponse;
 import com.globallogic.futbol.core.strategies.HttpOperationStrategy;
+import com.koushikdutta.async.future.Future;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
@@ -20,6 +21,7 @@ public abstract class StrategyIonBasic extends HttpOperationStrategy implements 
     private final StrategyIonConfig mConfig;
     private final String mUrl;
     private ArrayList<KeyValue> mHeaders = new ArrayList<>();
+    private Future<Response<String>> response;
 
     protected StrategyIonBasic(Operation anOperation, IStrategyHttpAnalyzer anAnalyzer, String aUrl) {
         this(anOperation, anAnalyzer, StrategyIonConfig.getDefaultConfig(), aUrl);
@@ -43,23 +45,27 @@ public abstract class StrategyIonBasic extends HttpOperationStrategy implements 
         mHeaders.add(valuePair);
     }
 
+    public void cancel() {
+        response.cancel(true);
+    }
+
     @Override
     protected void doRequestImpl() {
-        Builders.Any.B b = Ion
+        Builders.Any.B builder = Ion
                 .with(OperationApp.getInstance())
                 .load(getMethod(), getUrl())
                 .setTimeout(mConfig.getTimeOutMillisecond())
                 .addHeader("Content-Length", "0");
         for (KeyValue keyValue : mHeaders)
-            b.addHeader(keyValue.getKey(), keyValue.getValue());
-        getResponse(b);
+            builder.addHeader(keyValue.getKey(), keyValue.getValue());
+        response = getResponse(builder);
     }
 
     public abstract HttpRequest getHttpRequest();
 
     protected abstract String getMethod();
 
-    protected abstract void getResponse(Builders.Any.B b);
+    protected abstract Future<Response<String>> getResponse(Builders.Any.B b);
 
     @Override
     public void onCompleted(final Exception e, final Response<String> response) {

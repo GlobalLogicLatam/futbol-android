@@ -15,6 +15,7 @@ import com.globallogic.futbol.core.strategies.SharedPreferenceStrategy;
  * @since 0.3.6
  */
 public abstract class GetSharedPreferenceStrategy<T, U extends SharedPreferenceRepository> extends SharedPreferenceStrategy<T, U> {
+
     public GetSharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, U repository) {
         super(anOperation, anAnalyzer, repository);
     }

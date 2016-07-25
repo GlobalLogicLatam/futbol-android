@@ -24,6 +24,7 @@ public class StrategyHttpMock extends HttpOperationStrategy {
     protected final ArrayList<Exception> responsesException = new ArrayList<>();
     private final Float mErrorProbability;
     private Random random = new Random();
+    private boolean wasCanceled;
 
     /**
      * A StrategyHttpMock allows to simulate any response that the server can return.
@@ -41,21 +42,28 @@ public class StrategyHttpMock extends HttpOperationStrategy {
      */
     @Override
     public void doRequestImpl() {
-        if (random.nextFloat() < mErrorProbability) {
-            // Ejecuto un error
-            Exception mockException = getMockException();
-            if (mockException != null)
-                parseResponse(mockException, null);
-            else
-                onNotResponseAdded();
-        } else {
-            // Retorno alguna respuesta dummy
-            StrategyHttpResponse mockResponse = getMockResponse();
-            if (mockResponse != null)
-                parseResponse(null, mockResponse);
-            else
-                onNotResponseAdded();
+        if (!wasCanceled) {
+            if (random.nextFloat() < mErrorProbability) {
+                // Ejecuto un error
+                Exception mockException = getMockException();
+                if (mockException != null)
+                    parseResponse(mockException, null);
+                else
+                    onNotResponseAdded();
+            } else {
+                // Retorno alguna respuesta dummy
+                StrategyHttpResponse mockResponse = getMockResponse();
+                if (mockResponse != null)
+                    parseResponse(null, mockResponse);
+                else
+                    onNotResponseAdded();
+            }
         }
+    }
+
+    @Override
+    public void cancel() {
+        wasCanceled = true;
     }
 
     /**

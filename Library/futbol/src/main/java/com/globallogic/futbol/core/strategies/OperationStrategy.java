@@ -222,5 +222,7 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
         mLogger.info("On operation finish");
         mOperation.onStrategyFinish(this);
     }
+
+    public abstract void cancel();
     //endregion
 }

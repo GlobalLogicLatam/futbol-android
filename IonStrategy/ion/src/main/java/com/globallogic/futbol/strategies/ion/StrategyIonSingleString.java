@@ -2,6 +2,8 @@ package com.globallogic.futbol.strategies.ion;
 
 import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
 import com.globallogic.futbol.core.operations.Operation;
+import com.koushikdutta.async.future.Future;
+import com.koushikdutta.ion.Response;
 import com.koushikdutta.ion.builder.Builders;
 
 
@@ -38,8 +40,8 @@ public abstract class StrategyIonSingleString extends StrategyIonBasic {
     }
 
     @Override
-    protected void getResponse(Builders.Any.B b) {
-        b.setStringBody(mBody).asString().withResponse().setCallback(this);
+    protected Future<Response<String>> getResponse(Builders.Any.B b) {
+        return b.setStringBody(mBody).asString().withResponse().setCallback(this);
     }
 
     @Override

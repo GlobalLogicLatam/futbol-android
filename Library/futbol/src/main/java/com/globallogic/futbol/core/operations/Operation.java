@@ -12,6 +12,7 @@ import com.globallogic.futbol.core.strategies.OperationStrategy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,35 +20,33 @@ import java.util.logging.Logger;
  * A concrete implementation of {@link IOperation}
  *
  * @author facundo.mengoni
- * @since 0.1.0
  * @see IOperation
+ * @since 0.1.0
  */
 public abstract class Operation implements IOperation, Serializable {
     //region Constants
     private static final String SAVE_INSTANCE_STRATEGIES_IN_EXECUTION = "SAVE_INSTANCE_STRATEGIES_IN_EXECUTION";
     //endregion
 
+    //region Variables
+    public Long mConnectionDelay = 0L;
+    private String id;
+    private ArrayList<OperationStrategy> mStrategiesInExecution = new ArrayList<>();
+    //endregion
+
     //region Logger
     public Logger mLogger;
-
     {
         mLogger = Logger.getLogger(getClass().getSimpleName());
         mLogger.setLevel(Level.OFF);
     }
     //endregion
 
-    //region Variables
-    private String id;
-
-    public Long mConnectionDelay = 0l;
-    private int mStrategiesInExecution = 0;
-    //endregion
-
     //region Constructors implementation
 
     /**
      * Create a new instance with an empty id.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -62,7 +61,7 @@ public abstract class Operation implements IOperation, Serializable {
 
     /**
      * Create a new instance with the specified id.
-     * <p/>
+     * <p>
      * The id is used to register the receiver for a specific operation.
      * If you register two operation with different ids then the receiver
      * of one operation never listen the other operation.
@@ -123,6 +122,7 @@ public abstract class Operation implements IOperation, Serializable {
     /**
      * {@inheritDoc}<br>
      * The {@code arg} received will be passed to {@code getStrategies} to use there.
+     *
      * @see #doRequest(Object...)
      * @see #getStrategies(Object...)
      */
@@ -185,10 +185,12 @@ public abstract class Operation implements IOperation, Serializable {
     private boolean doRequest(Object... arg) {
         mLogger.info("Doing request");
         ArrayList<OperationStrategy> strategies = getStrategies(arg);
-        mStrategiesInExecution = strategies.size();
-        Boolean someRequestExecuted = mStrategiesInExecution > 0;
+        mStrategiesInExecution.addAll(strategies);
+        Boolean someRequestExecuted = strategies.size() > 0;
         if (someRequestExecuted) {
-            sendBroadcastForStart();
+            if (mStrategiesInExecution.size() == strategies.size()) {
+                sendBroadcastForStart();
+            }
             for (OperationStrategy operationStrategy : strategies) {
                 operationStrategy.setConnectionDelay(mConnectionDelay);
                 operationStrategy.execute();
@@ -206,9 +208,22 @@ public abstract class Operation implements IOperation, Serializable {
     protected abstract ArrayList<OperationStrategy> getStrategies(Object... arg);
 
     public void onStrategyFinish(OperationStrategy anOperationStrategy) {
-        mStrategiesInExecution--;
-        if (mStrategiesInExecution == 0)
+        mStrategiesInExecution.remove(anOperationStrategy);
+        if (mStrategiesInExecution.size() == 0)
             sendBroadcastForFinish();
+    }
+
+    public Boolean isWorking() {
+        return mStrategiesInExecution.size() > 0;
+    }
+    
+    public void cancel() {
+        Iterator<OperationStrategy> iterator = mStrategiesInExecution.iterator();
+        while (iterator.hasNext()) {
+            OperationStrategy operationStrategy = iterator.next();
+            operationStrategy.cancel();
+            iterator.remove();
+        }
     }
     //endregion
 
@@ -237,11 +252,12 @@ public abstract class Operation implements IOperation, Serializable {
     }
 
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION, mStrategiesInExecution);
+        outState.putSerializable(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION, mStrategiesInExecution);
     }
 
     public void onRestoreSavedInstance(Bundle savedInstanceState) {
-        mStrategiesInExecution = savedInstanceState.getInt(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION);
+        //noinspection unchecked
+        mStrategiesInExecution = (ArrayList<OperationStrategy>) savedInstanceState.getSerializable(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION);
     }
     //endregion
 }

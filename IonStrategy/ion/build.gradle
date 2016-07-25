@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 ext {
     appVersionCode = 1
-    appVersionName = '0.3.3'
+    appVersionName = '0.3.7'
 
     appGroupId = 'com.globallogic.futbol.strategies'
     appActifactId = 'ion'
@@ -39,7 +39,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-v4'
     }
     compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.globallogic:futbol:0.3.+'
+    compile 'com.globallogic:futbol:0.3.7.+'
 }
 
 // for AAR package

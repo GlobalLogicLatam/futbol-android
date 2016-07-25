@@ -36,6 +36,7 @@ import java.util.logging.Level;
  */
 public abstract class SharedPreferenceStrategy<T, U extends SharedPreferenceRepository> extends OperationStrategy<StrategySharedPreferenceResponse<T>> implements IOperationParser<StrategySharedPreferenceResponse<T>> {
     protected final U mRepository;
+    private boolean wasCanceled;
 
     //region Constructors implementation
     public SharedPreferenceStrategy(Operation anOperation, IStrategySharedPreferenceAnalyzer anAnalyzer, U repository) {
@@ -44,6 +45,10 @@ public abstract class SharedPreferenceStrategy<T, U extends SharedPreferenceRepo
     }
     //endregion
 
+    @Override
+    public void cancel() {
+        wasCanceled = true;
+    }
 
     public U getRepository() {
         return mRepository;
@@ -60,7 +65,6 @@ public abstract class SharedPreferenceStrategy<T, U extends SharedPreferenceRepo
     //endregion
 
     //region IOperationHttpParser implementation
-
     /**
      * {@inheritDoc}
      */
@@ -97,6 +101,9 @@ public abstract class SharedPreferenceStrategy<T, U extends SharedPreferenceRepo
     }
 
     public Boolean workInBackground(Exception anException, T object) {
+        if (wasCanceled) {
+            return false;
+        }
         mLogger.info("Work in background");
         if (anException != null) {
             getAnalyzer().analyzeException(anException);
