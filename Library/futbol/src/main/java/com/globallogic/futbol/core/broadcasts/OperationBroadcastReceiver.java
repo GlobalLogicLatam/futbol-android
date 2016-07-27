@@ -29,11 +29,11 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
         mLogger = Logger.getLogger(getClass().getSimpleName());
         mLogger.setLevel(Level.OFF);
     }
-
     //endregion
 
     //region Variables
     private final IOperationCallback mCallback;
+    protected boolean mMultiProcess = false;
     //endregion
 
     //region Constructors implementation
@@ -112,7 +112,11 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * @see #startListening(Class, String)
      */
     public void startListening(Operation aOperation) {
-        startListening(aOperation.getClass(), aOperation.getId());
+        startListening(aOperation, false);
+    }
+
+    public void startListening(Operation aOperation, boolean multiProcess) {
+        startListening(aOperation.getClass(), aOperation.getId(), multiProcess);
     }
 
     /**
@@ -123,7 +127,11 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * @see #startListening(Operation)
      */
     public void startListening(Class aClass) {
-        startListening(aClass, "");
+        startListening(aClass, false);
+    }
+
+    public void startListening(Class aClass, boolean multiProcess) {
+        startListening(aClass, "", multiProcess);
     }
 
     /**
@@ -136,9 +144,18 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * @see #addFiltersToListen(Class, String, IntentFilter)
      */
     public void startListening(Class aClass, String anId) {
+        startListening(aClass, anId, false);
+    }
+
+    public void startListening(Class aClass, String anId, boolean multiProcess) {
+        this.mMultiProcess = multiProcess;
         IntentFilter filter = new IntentFilter();
         addFiltersToListen(aClass, anId, filter);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).registerReceiver(this, filter);
+        if (Operation.sAllMultiProcess || mMultiProcess) {
+            OperationApp.getInstance().registerReceiver(this, filter);
+        } else {
+            LocalBroadcastManager.getInstance(OperationApp.getInstance()).registerReceiver(this, filter);
+        }
     }
 
     /**
@@ -164,7 +181,11 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * Unregister the receiver to stop listening to the events of the operation
      */
     public void stopListening() {
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).unregisterReceiver(this);
+        if (Operation.sAllMultiProcess || mMultiProcess) {
+            OperationApp.getInstance().unregisterReceiver(this);
+        } else {
+            LocalBroadcastManager.getInstance(OperationApp.getInstance()).unregisterReceiver(this);
+        }
     }
     //endregion
 }

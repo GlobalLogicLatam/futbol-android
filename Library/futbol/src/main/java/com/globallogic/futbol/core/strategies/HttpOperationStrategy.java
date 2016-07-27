@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.text.TextUtils;
 
-import com.globallogic.futbol.core.LocalBroadcastManager;
 import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.OperationResult;
 import com.globallogic.futbol.core.broadcasts.OperationBroadcastReceiverHelper;
@@ -67,12 +66,12 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
 
         String actionWithId = OperationBroadcastReceiverHelper.getActionForNoInternet(mOperation);
         intent.setAction(actionWithId);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        mOperation.sendBroadcast(intent);
 
         String actionWithOutID = OperationBroadcastReceiverHelper.getActionForNoInternet(getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
-            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+            mOperation.sendBroadcast(intent);
         }
     }
     //endregion
