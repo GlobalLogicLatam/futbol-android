@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 
-import com.globallogic.futbol.core.LocalBroadcastManager;
-import com.globallogic.futbol.core.OperationApp;
 import com.globallogic.futbol.core.OperationResult;
 import com.globallogic.futbol.core.broadcasts.OperationBroadcastReceiverHelper;
 import com.globallogic.futbol.core.interfaces.IStrategy;
@@ -34,7 +32,7 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
     public Logger mLogger;
     //endregion
     protected Long timeInit;
-    protected Long mConnectionDelay = 0l;
+    protected Long mConnectionDelay = 0L;
     private IStrategyAnalyzer mAnalyzer;
 
     {
@@ -51,7 +49,6 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
     //endregion
 
     //region Getters & Setters implementation
-
     /**
      * Defines a time delay for the operation
      *
@@ -107,12 +104,12 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
 
         String actionWithId = OperationBroadcastReceiverHelper.getActionForOk(mOperation);
         intent.setAction(actionWithId);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        mOperation.sendBroadcast(intent);
 
         String actionWithOutID = OperationBroadcastReceiverHelper.getActionForOk(mOperation.getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
-            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+            mOperation.sendBroadcast(intent);
         }
     }
 
@@ -127,12 +124,12 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
 
         String actionWithId = OperationBroadcastReceiverHelper.getActionForError(mOperation);
         intent.setAction(actionWithId);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        mOperation.sendBroadcast(intent);
 
         String actionWithOutID = OperationBroadcastReceiverHelper.getActionForError(mOperation.getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
-            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+            mOperation.sendBroadcast(intent);
         }
     }
     //endregion

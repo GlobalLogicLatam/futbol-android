@@ -29,13 +29,15 @@ public abstract class Operation implements IOperation, Serializable {
     //endregion
 
     //region Variables
+    public static boolean sAllMultiProcess = false;
+    protected boolean mMultiProcess = false;
     public Long mConnectionDelay = 0L;
-    private String id;
-    private ArrayList<OperationStrategy> mStrategiesInExecution = new ArrayList<>();
-    //endregion
-
     //region Logger
     public Logger mLogger;
+    private String id;
+    //endregion
+    private ArrayList<OperationStrategy> mStrategiesInExecution = new ArrayList<>();
+
     {
         mLogger = Logger.getLogger(getClass().getSimpleName());
         mLogger.setLevel(Level.OFF);
@@ -143,12 +145,12 @@ public abstract class Operation implements IOperation, Serializable {
 
         String actionWithId = OperationBroadcastReceiverHelper.getActionForStart(this);
         intent.setAction(actionWithId);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        sendBroadcast(intent);
 
         String actionWithOutID = OperationBroadcastReceiverHelper.getActionForStart(getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
-            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+            sendBroadcast(intent);
         }
     }
 
@@ -163,18 +165,17 @@ public abstract class Operation implements IOperation, Serializable {
 
         String actionWithId = OperationBroadcastReceiverHelper.getActionForFinish(this);
         intent.setAction(actionWithId);
-        LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+        sendBroadcast(intent);
 
         String actionWithOutID = OperationBroadcastReceiverHelper.getActionForFinish(getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
-            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
+            sendBroadcast(intent);
         }
     }
     //endregion
 
     //region Operation implementation
-
     /**
      * Notify that the operation starts and execute all the strategies defined.
      *
@@ -216,13 +217,21 @@ public abstract class Operation implements IOperation, Serializable {
     public Boolean isWorking() {
         return mStrategiesInExecution.size() > 0;
     }
-    
+
     public void cancel() {
         Iterator<OperationStrategy> iterator = mStrategiesInExecution.iterator();
         while (iterator.hasNext()) {
             OperationStrategy operationStrategy = iterator.next();
             operationStrategy.cancel();
             iterator.remove();
+        }
+    }
+
+    public void sendBroadcast(Intent intent) {
+        if (sAllMultiProcess || mMultiProcess) {
+            OperationApp.getInstance().sendBroadcast(intent);
+        } else {
+            LocalBroadcastManager.getInstance(OperationApp.getInstance()).sendBroadcast(intent);
         }
     }
     //endregion
