@@ -188,14 +188,16 @@ public abstract class Operation implements IOperation, Serializable {
         ArrayList<OperationStrategy> strategies = getStrategies(arg);
         mStrategiesInExecution.addAll(strategies);
         Boolean someRequestExecuted = strategies.size() > 0;
+        if (mStrategiesInExecution.size() == strategies.size()) {
+            sendBroadcastForStart();
+        }
         if (someRequestExecuted) {
-            if (mStrategiesInExecution.size() == strategies.size()) {
-                sendBroadcastForStart();
-            }
             for (OperationStrategy operationStrategy : strategies) {
                 operationStrategy.setConnectionDelay(mConnectionDelay);
                 operationStrategy.execute();
             }
+        } else {
+            sendBroadcastForFinish();
         }
         return someRequestExecuted;
     }
