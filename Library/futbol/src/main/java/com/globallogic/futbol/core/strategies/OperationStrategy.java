@@ -29,7 +29,7 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
     //region Variables
     final protected Operation mOperation;
     //region Logger
-    public Logger mLogger;
+    public transient Logger mLogger;
     //endregion
     protected Long timeInit;
     protected Long mConnectionDelay = 0L;

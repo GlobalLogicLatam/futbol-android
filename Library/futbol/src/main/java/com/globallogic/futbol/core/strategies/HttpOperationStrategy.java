@@ -60,7 +60,6 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
 
     //region HttpOperationStrategy implementation
     private void sendBroadcastForNoInternet() {
-        mLogger.info("Sending broadcast for no internet");
         Intent intent = new Intent();
         intent.putExtra(OperationResult.EXTRA_OPERATION_RESULT, OperationResult.NO_INTERNET.name);
 

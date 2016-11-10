@@ -33,7 +33,7 @@ public abstract class Operation implements IOperation, Serializable {
     protected boolean mMultiProcess = false;
     public Long mConnectionDelay = 0L;
     //region Logger
-    public Logger mLogger;
+    public transient Logger mLogger;
     private String id;
     //endregion
     private ArrayList<OperationStrategy> mStrategiesInExecution = new ArrayList<>();

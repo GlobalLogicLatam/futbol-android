@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.os.Build;
 
+import com.globallogic.futbol.core.interfaces.repository.BooleanRepository;
 import com.globallogic.futbol.core.interfaces.repository.FloatRepository;
 import com.globallogic.futbol.core.interfaces.repository.IntegerRepository;
 import com.globallogic.futbol.core.interfaces.repository.LongRepository;
@@ -18,8 +19,9 @@ import java.util.Set;
  * @author facundo.mengoni
  * @since 0.3.4
  */
-public abstract class GenericSharedRepository implements FloatRepository, IntegerRepository, LongRepository, StringRepository, StringSetRepository {
+public abstract class GenericSharedRepository implements FloatRepository, IntegerRepository, LongRepository, StringRepository, StringSetRepository, BooleanRepository {
     //region Default values
+    private static final boolean DEFAULT_BOOLEAN_VALUE = false;
     private static final float DEFAULT_FLOAT_VALUE = -1;
     private static final int DEFAULT_INTEGER_VALUE = -1;
     private static final long DEFAULT_LONG_VALUE = -1;
@@ -57,6 +59,18 @@ public abstract class GenericSharedRepository implements FloatRepository, Intege
     @Override
     public Boolean hasKey() {
         return mShared.contains(getKey());
+    }
+    //endregion
+
+    //region FloatRepository implementation
+    @Override
+    public Boolean getBoolean() {
+        return mShared.getBoolean(getKey(), DEFAULT_BOOLEAN_VALUE);
+    }
+
+    @Override
+    public void putBoolean(boolean value) {
+        apply(getEditor().putBoolean(getKey(), value));
     }
     //endregion
 
