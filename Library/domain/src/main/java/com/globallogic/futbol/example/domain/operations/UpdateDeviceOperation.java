@@ -3,19 +3,17 @@ package com.globallogic.futbol.example.domain.operations;
 import android.content.Intent;
 
 import com.globallogic.futbol.core.OperationApp;
-import com.globallogic.futbol.core.interfaces.analyzers.IStrategyHttpAnalyzer;
+import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
 import com.globallogic.futbol.core.interfaces.callbacks.IStrategyHttpCallback;
 import com.globallogic.futbol.core.operations.OperationHelper;
-import com.globallogic.futbol.core.broadcasts.OperationHttpBroadcastReceiver;
+import com.globallogic.futbol.core.responses.StrategyHttpResponse;
 import com.globallogic.futbol.core.strategies.OperationStrategy;
 import com.globallogic.futbol.core.strategies.mock.StrategyHttpMock;
-import com.globallogic.futbol.core.responses.StrategyHttpResponse;
 import com.globallogic.futbol.example.domain.models.Device;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -50,6 +48,12 @@ public class UpdateDeviceOperation extends BaseOperation {
                         return true;
                 }
                 return false;
+            }
+
+            @Override
+            public void reset() {
+                mDevice = null;
+                mNotFound = false;
             }
 
             @Override

@@ -122,6 +122,7 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
      */
     @Override
     public Boolean workInBackground(Exception anException, Integer aHttpCode, String aString) {
+        getAnalyzer().reset();
         mLogger.info("Work in background");
         if (anException != null) {
             getAnalyzer().analyzeException(anException);

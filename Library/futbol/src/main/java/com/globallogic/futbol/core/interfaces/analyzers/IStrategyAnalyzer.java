@@ -10,6 +10,11 @@ import android.content.Intent;
  */
 public interface IStrategyAnalyzer {
     /**
+     * Reset the state of the analyzer.
+     */
+    void reset();
+
+    /**
      * Add the extras that you need to notify what happened.
      *
      * @param intent The intent where add the extras.

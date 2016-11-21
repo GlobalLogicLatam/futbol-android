@@ -35,6 +35,11 @@ public class GetDeviceHttpAnalyzer implements IStrategyHttpAnalyzer {
         return true;
     }
 
+    @Override
+    public void reset() {
+        mDevice = null;
+    }
+
     public void addExtrasForResultError(Intent intent) {
         // Notify the error
     }

@@ -30,6 +30,11 @@ public class TimeOutOperation extends BaseOperation {
             }
 
             @Override
+            public void reset() {
+
+            }
+
+            @Override
             public void addExtrasForResultOk(Intent intent) {
 
             }
