@@ -12,7 +12,6 @@ import com.globallogic.futbol.core.strategies.OperationStrategy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,13 +29,13 @@ public abstract class Operation implements IOperation, Serializable {
 
     //region Variables
     public static boolean sAllMultiProcess = false;
-    protected boolean mMultiProcess = false;
     public Long mConnectionDelay = 0L;
     //region Logger
     public transient Logger mLogger;
+    protected boolean mMultiProcess = false;
     private String id;
     //endregion
-    private ArrayList<OperationStrategy> mStrategiesInExecution = new ArrayList<>();
+    private Long mStrategiesInExecution = 0L;
 
     {
         mLogger = Logger.getLogger(getClass().getSimpleName());
@@ -176,6 +175,7 @@ public abstract class Operation implements IOperation, Serializable {
     //endregion
 
     //region Operation implementation
+
     /**
      * Notify that the operation starts and execute all the strategies defined.
      *
@@ -186,9 +186,9 @@ public abstract class Operation implements IOperation, Serializable {
     private boolean doRequest(Object... arg) {
         mLogger.info("Doing request");
         ArrayList<OperationStrategy> strategies = getStrategies(arg);
-        mStrategiesInExecution.addAll(strategies);
+        mStrategiesInExecution += strategies.size();
         Boolean someRequestExecuted = strategies.size() > 0;
-        if (mStrategiesInExecution.size() == strategies.size()) {
+        if (mStrategiesInExecution == strategies.size()) {
             sendBroadcastForStart();
         }
         if (someRequestExecuted) {
@@ -211,22 +211,13 @@ public abstract class Operation implements IOperation, Serializable {
     protected abstract ArrayList<OperationStrategy> getStrategies(Object... arg);
 
     public void onStrategyFinish(OperationStrategy anOperationStrategy) {
-        mStrategiesInExecution.remove(anOperationStrategy);
-        if (mStrategiesInExecution.size() == 0)
+        mStrategiesInExecution -= 1;
+        if (mStrategiesInExecution == 0)
             sendBroadcastForFinish();
     }
 
     public Boolean isWorking() {
-        return mStrategiesInExecution.size() > 0;
-    }
-
-    public void cancel() {
-        Iterator<OperationStrategy> iterator = mStrategiesInExecution.iterator();
-        while (iterator.hasNext()) {
-            OperationStrategy operationStrategy = iterator.next();
-            operationStrategy.cancel();
-            iterator.remove();
-        }
+        return mStrategiesInExecution > 0;
     }
 
     public void sendBroadcast(Intent intent) {
@@ -263,12 +254,11 @@ public abstract class Operation implements IOperation, Serializable {
     }
 
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION, mStrategiesInExecution);
+        outState.putLong(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION, mStrategiesInExecution);
     }
 
     public void onRestoreSavedInstance(Bundle savedInstanceState) {
-        //noinspection unchecked
-        mStrategiesInExecution = (ArrayList<OperationStrategy>) savedInstanceState.getSerializable(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION);
+        mStrategiesInExecution = savedInstanceState.getLong(SAVE_INSTANCE_STRATEGIES_IN_EXECUTION);
     }
     //endregion
 }
