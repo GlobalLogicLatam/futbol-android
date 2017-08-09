@@ -49,24 +49,36 @@ public abstract class OperationStrategy<T extends StrategyResponse> implements I
     //endregion
 
     //region Getters & Setters implementation
+
     /**
-     * Defines a time delay for the operation
-     *
+     * @return A time delay for the operation.
      * @see #setConnectionDelay(long)
      * @see OperationStrategy#simulateWaiting()
      */
-    public void setConnectionDelay(int duration) {
-        this.mConnectionDelay = (long) duration;
+    public Long getConnectionDelay() {
+        return this.mConnectionDelay;
     }
 
     /**
      * Defines a time delay for the operation
      *
+     * @see #getConnectionDelay()
      * @see #setConnectionDelay(int)
      * @see OperationStrategy#simulateWaiting()
      */
     public void setConnectionDelay(long duration) {
         this.mConnectionDelay = duration;
+    }
+
+    /**
+     * Defines a time delay for the operation
+     *
+     * @see #getConnectionDelay()
+     * @see #setConnectionDelay(long)
+     * @see OperationStrategy#simulateWaiting()
+     */
+    public void setConnectionDelay(int duration) {
+        this.mConnectionDelay = (long) duration;
     }
 
     /**

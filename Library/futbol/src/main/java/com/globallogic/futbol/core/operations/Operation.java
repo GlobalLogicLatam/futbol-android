@@ -193,7 +193,7 @@ public abstract class Operation implements IOperation, Serializable {
         }
         if (someRequestExecuted) {
             for (OperationStrategy operationStrategy : strategies) {
-                operationStrategy.setConnectionDelay(mConnectionDelay);
+                operationStrategy.setConnectionDelay(mConnectionDelay + operationStrategy.getConnectionDelay());
                 operationStrategy.execute();
             }
         } else {
