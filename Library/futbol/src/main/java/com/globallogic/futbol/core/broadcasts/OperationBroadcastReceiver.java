@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     //region Logger
     public Logger mLogger;
+    protected boolean isListening;
 
     {
         mLogger = Logger.getLogger(getClass().getSimpleName());
@@ -47,7 +48,11 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context aContext, Intent intent) {
         String status = intent.getStringExtra(OperationResult.EXTRA_OPERATION_RESULT);
         mLogger.info("onReceive: ".concat(status));
-        checkStatus(status, intent);
+        if (isListening) {
+            checkStatus(status, intent);
+        } else {
+            mLogger.info("The receiver isn't listening");
+        }
     }
 
     /**
@@ -148,6 +153,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void startListening(Class aClass, String anId, boolean multiProcess) {
+        isListening = true;
         this.mMultiProcess = multiProcess;
         IntentFilter filter = new IntentFilter();
         addFiltersToListen(aClass, anId, filter);
@@ -181,6 +187,7 @@ public abstract class OperationBroadcastReceiver extends BroadcastReceiver {
      * Unregister the receiver to stop listening to the events of the operation
      */
     public void stopListening() {
+        isListening = false;
         if (Operation.sAllMultiProcess || mMultiProcess) {
             OperationApp.getInstance().unregisterReceiver(this);
         } else {
