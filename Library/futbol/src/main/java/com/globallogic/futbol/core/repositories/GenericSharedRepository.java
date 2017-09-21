@@ -60,6 +60,11 @@ public abstract class GenericSharedRepository implements FloatRepository, Intege
     public Boolean hasKey() {
         return mShared.contains(getKey());
     }
+
+    @Override
+    public void removeKey() {
+        apply(getEditor().remove(getKey()));
+    }
     //endregion
 
     //region FloatRepository implementation

@@ -8,4 +8,6 @@ package com.globallogic.futbol.core.interfaces.repository;
  */
 public interface SharedPreferenceRepository {
     Boolean hasKey();
+
+    void removeKey();
 }
