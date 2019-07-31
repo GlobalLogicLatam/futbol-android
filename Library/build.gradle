@@ -1,16 +1,12 @@
-import java.util.regex.Pattern
-
 def getVersionName = { ->
     def os = System.getProperty("os.name").toLowerCase()
     def revision = new ByteArrayOutputStream()
     def lastCommit = new ByteArrayOutputStream()
-    def branch = new ByteArrayOutputStream()
 
     if (os.contains("mac")) {
         def commit = new String()
         commit = ['sh', '-c', 'git log --pretty=format:"%h" -1'].execute().text.trim()
         revision = ['sh', '-c', 'git rev-list ' + commit + ' | wc -l | tr -d " "'].execute().text
-        branch = ['sh', '-c', 'git rev-parse --abbrev-ref HEAD'].execute().text
     } else if (!os.contains("windows")) {
         exec {
             executable "/bin/sh"
@@ -22,11 +18,6 @@ def getVersionName = { ->
             executable "/bin/sh"
             args "-c", "echo -n `git rev-list " + lastCommit + " | wc -l | sed 's/^[ ^t]*//'`"
             standardOutput = revision;
-        }
-        exec {
-            executable "/bin/sh"
-            args "-c", "echo -n `git rev-parse --abbrev-ref HEAD`"
-            standardOutput = branch;
         }
     } else {
         exec {
@@ -42,26 +33,9 @@ def getVersionName = { ->
             args "/c", "git rev-list " + lastCommit + " | find /c /v \"\""
             standardOutput = revision;
         }
-        exec {
-            executable "cmd"
-            args "/c", "git rev-parse --abbrev-ref HEAD"
-            standardOutput = branch;
-        }
     }
     revision = revision as String
     revision = revision.trim()
-    branch = branch as String
-    branch = branch.trim()
-    String task = getGradle().getStartParameter().getTaskRequests().toString()
-    if( Pattern.compile("Debug").matcher( task ).find() ) {
-        if ( branch.toLowerCase().matches("release[-_]\\d+.+") ) {
-            revision = revision + " (" + (branch =~ /release[-_][0-9.]+/)[0] + ")"
-        } else if ( branch.toUpperCase().matches("CLA[-_]\\d+.+") ) {
-            revision = revision + " (" + (branch =~ /CLA[-_][0-9.]+/)[0] + ")"
-        } else if ( branch.toUpperCase().matches("EPIC[-_]\\d+.+") ) {
-            revision = revision + " (" + (branch =~ /EPIC[-_][0-9.]+/)[0] + ")"
-        }
-    }
     return revision
 }
 

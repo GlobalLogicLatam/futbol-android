@@ -22,6 +22,8 @@ android {
         targetSdkVersion 23
         versionCode appVersionCode
         versionName appVersionName
+
+        println "Running version " + appVersionName
     }
     buildTypes {
         release {
