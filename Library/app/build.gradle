@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "25.0.0"
 
     // AndroidHttpClient fix https://github.com/robolectric/robolectric/issues/1862#issuecomment-132765762
     useLibrary 'org.apache.http.legacy'

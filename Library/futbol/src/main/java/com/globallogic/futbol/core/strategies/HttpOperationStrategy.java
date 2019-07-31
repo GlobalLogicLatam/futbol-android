@@ -67,7 +67,7 @@ public abstract class HttpOperationStrategy extends OperationStrategy<StrategyHt
         intent.setAction(actionWithId);
         mOperation.sendBroadcast(intent);
 
-        String actionWithOutID = OperationBroadcastReceiverHelper.getActionForNoInternet(getClass());
+        String actionWithOutID = OperationBroadcastReceiverHelper.getActionForNoInternet(mOperation.getClass());
         if (!actionWithId.equals(actionWithOutID)) {
             intent.setAction(actionWithOutID);
             mOperation.sendBroadcast(intent);
